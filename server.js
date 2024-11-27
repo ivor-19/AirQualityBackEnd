@@ -5,6 +5,7 @@ const cors = require('cors');
 const app = express();
 const mongoose = require('mongoose');
 const studentRoutes = require('./routes/studentRoutes');
+const historyRoutes = require('./routes/historyRoutes');
 
 app.use(cors());
 app.use(express.json());
@@ -17,6 +18,7 @@ mongoose.connect(process.env.MONGO_URI)
   .catch((err) => console.error('MongoDB connection error:', err));
 
 app.use('/api/students', studentRoutes)
+app.use('/api/history', historyRoutes)
 
 app.listen(port, () => {
     console.log(`Server is running at port ${port}`)
