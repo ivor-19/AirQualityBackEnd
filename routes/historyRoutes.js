@@ -12,8 +12,8 @@ router.get('/', async (req, res) => {
 })
 
 router.post('/', async (req, res) => {
-    const { date, pm2_5, co2, no2, timestamp } = req.body;
-    const newData = new History({ date, pm2_5, co2, no2, timestamp });
+    const { date, pm2_5, co2, no2, timestamp, aqi } = req.body;
+    const newData = new History({ date, pm2_5, co2, no2, timestamp, aqi });
 
     try {
         await newData.save();
