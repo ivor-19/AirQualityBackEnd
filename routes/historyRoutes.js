@@ -12,7 +12,7 @@ router.get('/', async (req, res) => {
 })
 
 router.post('/', async (req, res) => {
-    const { date, timestamp, aqi, pm2_5, co2, no2 } = req.body;
+    const { date, timestamp, aqi, pm2_5, co, no2 } = req.body;
     const newData = new History({ date, timestamp, aqi, pm2_5, co, no2 });
 
     try {
