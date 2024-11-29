@@ -5,7 +5,6 @@ const historySchema = new mongoose.Schema({
     timestamp: String,
     aqi: Number,
     pm2_5: Number,
-    co: Number,
     no2: Number,
   });
   
