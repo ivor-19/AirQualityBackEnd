@@ -6,6 +6,7 @@ const app = express();
 const mongoose = require('mongoose');
 const studentRoutes = require('./routes/studentRoutes');
 const historyRoutes = require('./routes/historyRoutes');
+const latestaqRoutes = require('./routes/latestaqRoutes');
 
 app.use(cors());
 app.use(express.json());
@@ -19,6 +20,7 @@ mongoose.connect(process.env.MONGO_URI)
 
 app.use('/api/students', studentRoutes)
 app.use('/api/history', historyRoutes)
+app.use('/api/latestaq', latestaqRoutes)
 
 app.listen(port, () => {
     console.log(`Server is running at port ${port}`)
