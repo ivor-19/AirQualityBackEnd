@@ -10,8 +10,8 @@ const getLatestAQ = async (req, res) => {
 }
 
 const postLatestAQ = async (req, res) => {
-    const {date, timestamp, aqi, pm2_5, co, no2} = req.body;
-    const newData = new LatestAQ({date, timestamp, aqi, pm2_5, co, no2});
+    const {aqi, pm2_5, co, no2} = req.body;
+    const newData = new LatestAQ({aqi, pm2_5, co, no2});
     try {
         await newData.save();
         const getList = await LatestAQ.find();
