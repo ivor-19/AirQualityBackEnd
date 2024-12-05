@@ -20,28 +20,30 @@ const signup = async (req, res) => {
 
 const login = async (req, res) => {
     try {
-        const { email, password} = req.body;
-        
+        const { email, password } = req.body;
+  
         const user = await User.findOne({ email });
-        if(!user){
-            return res.status(400).json({message: 'Invalid email or password.'});
+        if (!user) {
+            return res.status(400).json({ message: 'Invalid email or password' });
         }
-
+  
         const isMatch = await user.comparePassword(password);
-        if(!isMatch){
-            return res.status(400).json({message: 'Invalid email or password.'});
+        if (!isMatch) {
+            return res.status(400).json({ message: 'Invalid email or password' });
         }
-
+    
         const token = jwt.sign(
-            {id: user._id, email: user.email},
+            { id: user._id, email: user.email },
             process.env.JWT_SECRET,
-            {expiresIn: '1h'}
-        )
-        return res.json({message: 'Login Succssful', token})
-    } catch (error) {
-        res.status(500).json({message: 'Server Error: Error logging account', error})
+            { expiresIn: '1h' }
+        );
+  
+        return res.json({ message: 'Login successful', token });
+    } catch (err) {
+        console.error('Error during login:', err); 
+        return res.status(500).json({ message: 'Server Error: Error logging account', error: err.message });
     }
-}
+  };
 
 const getUsers = async (req, res) => {
     try {
