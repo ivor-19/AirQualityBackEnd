@@ -5,9 +5,14 @@ const signup = async (req, res) => {
     try {
         const { username, email, password } = req.body;
 
-        const userExists = await User.findOne({ email });
+        const userExists = await User.findOne({ username });
         if(userExists){
-            return res.status(400).json({message: 'Email already taken.'});
+            return res.status(400).json({message: 'Username is already taken.'});
+        }
+
+        const emailExists = await User.findOne({ email });
+        if(emailExists){
+            return res.status(400).json({message: 'Email is already taken.'});
         }
 
         const newUser = new User({ username, email, password});
