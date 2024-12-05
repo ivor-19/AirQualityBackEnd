@@ -37,6 +37,7 @@ const login = async (req, res) => {
             process.env.JWT_SECRET,
             { expiresIn: '1h' }
         );
+        console.log('Generated Token:', token);
   
         return res.json({ message: 'Login successful', token });
     } catch (err) {
