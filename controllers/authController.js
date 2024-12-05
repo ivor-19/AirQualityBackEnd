@@ -43,4 +43,14 @@ const login = async (req, res) => {
     }
 }
 
-module.exports = {signup, login};
+const getUsers = async (req, res) => {
+    try {
+        const getUsers = await User.find();
+        res.json(getUsers)
+
+    } catch (error) {
+        res.status(500).json({message: 'Server Error: Error fetching data', error})
+    }
+}
+
+module.exports = {signup, login, getUsers};
