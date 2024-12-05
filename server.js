@@ -4,6 +4,7 @@ const express = require('express');
 const cors = require('cors');
 const app = express();
 const mongoose = require('mongoose');
+const jwt = require('jsonwebtoken');
 const studentRoutes = require('./routes/studentRoutes');
 const historyRoutes = require('./routes/historyRoutes');
 const latestaqRoutes = require('./routes/latestaqRoutes');
@@ -15,6 +16,7 @@ app.use(express.json());
 
 // console.log('JWT_SECRET:', process.env.JWT_SECRET);
 const port = process.env.PORT || 5000;
+console.log('JWT_SECRET:', process.env.JWT_SECRET);
 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGO_URI)
