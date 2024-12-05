@@ -13,6 +13,7 @@ const authRoutes = require('./routes/authRoutes');
 app.use(cors());
 app.use(express.json());
 
+console.log('JWT_SECRET:', process.env.JWT_SECRET);
 const port = process.env.PORT || 5000;
 
 // Connect to MongoDB
