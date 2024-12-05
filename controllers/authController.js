@@ -1,46 +1,26 @@
 const User = require('../models/User');
-const jwt = require('jsonwebtoken');
 
-const signup = async (req, res) => {
+const getUsers = async (req, res) => {
     try {
-        const { username, email, password } = req.body;
-
-        const userExists = await User.findOne({ email });
-        if(userExists){
-            return res.status(400).json({message: 'Email already taken.'});
-        }
-
-        const newUser = new User({ username, email, password});
-        await newUser.save();
-        return res.status(201).json({message: 'Account created successfully!'});
+        const getList = await User.find();
+        res.json(getList);
     } catch (error) {
-        res.status(500).json({message: 'Server Error: Error creating account', error})
+        res.status(500).json({message: 'Error fetching data', error})
     }
 }
 
-const login = async (req, res) => {
+
+const postUsers = async (req, res) => {
+    const {username, email, password} = req.body;
+    const newData = new User({username, email, password});
+
     try {
-        const { email, password} = req.body;
-        
-        const user = await User.findOne({ email });
-        if(!user){
-            return res.status(400).json({message: 'Invalid email or password.'});
-        }
-
-        const isMatch = await user.comparePassword(password);
-        if(!isMatch){
-            return res.status(400).json({message: 'Invalid email or password.'});
-        }
-
-        const token = jwt.sign(
-            {id: user._id, email: user.email},
-            process.env.JWT_SECRET,
-            {expiresIn: '1h'}
-        )
-        return res.json({message: 'Login Succssful', token})
+        await newData.save();
+        const getList = await User.find();
+        res.status(201).json({message: 'New data is saved: ', getList})
     } catch (error) {
-        res.status(500).json({message: 'Server Error: Error logging account', error})
+        res.status(500).json({message: 'Error saving data: ', error})
     }
 }
 
-module.exports = {signup, login};
+module.exports = {getUsers, postUsers};
