@@ -34,7 +34,7 @@ const login = async (req, res) => {
     
         const token = jwt.sign(
             { id: user._id, email: user.email },
-            process.env.JWT_SECRET,
+            '32d2f8d7d7e49868c3e453019bf8c47a1fbed0e36e755f13b5f81c79db48fc7e',
             { expiresIn: '1h' }
         );
         console.log('Generated Token:', token);
