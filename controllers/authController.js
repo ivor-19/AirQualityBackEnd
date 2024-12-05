@@ -41,6 +41,7 @@ const login = async (req, res) => {
   
         return res.json({ message: 'Login successful', token });
     } catch (err) {
+        console.log('JWT: ', process.env.JWT_SECRET);
         console.error('Error during login:', err); 
         return res.status(500).json({ message: 'Server Error: Error logging account', error: err.message });
     }
