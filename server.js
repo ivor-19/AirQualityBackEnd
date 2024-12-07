@@ -9,6 +9,7 @@ const studentRoutes = require('./routes/studentRoutes');
 const historyRoutes = require('./routes/historyRoutes');
 const latestaqRoutes = require('./routes/latestaqRoutes');
 const authRoutes = require('./routes/authRoutes');
+const assetRoutes = require('./routes/assetRoutes')
 
 
 app.use(cors());
@@ -26,6 +27,7 @@ app.use('/api/students', studentRoutes)
 app.use('/api/history', historyRoutes)
 app.use('/api/latestaq', latestaqRoutes)
 app.use('/api/users', authRoutes)
+app.use('/api/assets', assetRoutes)
 
 app.listen(port, () => {
     console.log(`Server is running at port ${port}`)
