@@ -1,6 +1,6 @@
 const Asset = require('../models/Asset');
 
-const getAssetNames = async () => {
+const getAssetNames = async (req, res) => {
     try {
         const getList = await Asset.find();
         res.json(getList);
@@ -9,7 +9,7 @@ const getAssetNames = async () => {
     }
 }
 
-const postAssetNames = async () => {
+const postAssetNames = async (req, res) => {
     const {assetName} = req.body;
     const newAssetName = new Asset({assetName});
     try {
