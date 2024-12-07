@@ -44,7 +44,16 @@ const login = async (req, res) => {
         );
         console.log('Generated Token:', token);
   
-        return res.json({ message: 'Login successful', token });
+        return res.json({
+            message: 'Login successful',
+            token,
+            user: {
+                _id: user._id,
+                username: user.username,
+                email: user.email,
+                // Do not send password to frontend for security reasons
+            }
+        });
     } catch (err) {
         console.error('Error during login:', err); 
         return res.status(500).json({ message: 'Server Error: Error logging account', error: err.message });
