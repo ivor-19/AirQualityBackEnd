@@ -9,4 +9,16 @@ const getAssetNames = async () => {
     }
 }
 
-module.exports = {getAssetNames}
+const postAssetNames = async () => {
+    const {assetName} = req.body;
+    const newAssetName = new Asset({assetName});
+    try {
+        await newAssetName.save();
+        const getList = await Asset.find();
+        res.status().json({messag: 'New asset added', getList});
+    } catch (error) {
+        res.status(500).json({message: 'Error fetching assets', error})
+    }
+}
+
+module.exports = {getAssetNames, postAssetNames}
