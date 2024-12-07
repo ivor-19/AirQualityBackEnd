@@ -15,9 +15,9 @@ const postAssetNames = async (req, res) => {
     try {
         await newAssetName.save();
         const getList = await Asset.find();
-        res.status().json({messag: 'New asset added', getList});
+        res.status(201).json({messag: 'New asset added', getList});
     } catch (error) {
-        res.status(500).json({message: 'Error fetching assets', error})
+        res.status(500).json({message: 'Error adding asset', error})
     }
 }
 
