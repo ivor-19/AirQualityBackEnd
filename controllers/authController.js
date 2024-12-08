@@ -12,6 +12,9 @@ const signup = async (req, res) => {
         await newUser.save();
         return res.status(201).json({message: 'Account created successfully!'});
     } catch (error) {
+        if (error.message === 'Username is already taken.' || error.message === 'Email is already taken.') {
+            return res.status(400).json({ message: error.message });
+        }
         res.status(500).json({message: 'Server Error: Error creating account', error})
     }
 }
