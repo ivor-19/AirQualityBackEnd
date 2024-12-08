@@ -7,6 +7,7 @@ const historySchema = new mongoose.Schema({
     pm2_5: Number,
     co: Number,
     no2: Number,
+    scanned_by: String,
   });
   
 const History = mongoose.model('History', historySchema);
