@@ -9,6 +9,20 @@ const getAQReadingsList = async (req, res) => {
     }
 }
 
+const getModelReading= async (req, res) => {
+    const {asset_model} = req.query;
+    try {
+        const asset = await AirQualityReading.findOne({asset_model});
+        if(!asset){
+            return res.status(400).json({message: "Can't find model"});
+        }
+
+        res.status(201).json({message: 'Model found', asset})
+    } catch (error) {
+        res.status(500).json({message: 'Error fetching model', error})
+    }
+}
+
 const postAQReadings = async (req, res) => {
     const {aqi, pm2_5, co, no2, asset_model} = req.body;
     const newData = new AirQualityReading({aqi, pm2_5, co, no2, asset_model});
@@ -21,4 +35,4 @@ const postAQReadings = async (req, res) => {
     }
 }
 
-module.exports = {getAQReadingsList, postAQReadings}
+module.exports = {getAQReadingsList, getModelReading, postAQReadings}
