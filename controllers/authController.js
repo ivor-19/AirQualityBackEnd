@@ -15,7 +15,7 @@ const signup = async (req, res) => {
             return res.status(400).json({message: 'Email is already taken.'});
         }
 
-        const newUser = new User({ username, email, password});
+        const newUser = new User({ username, email, password, asset_model, first_access});
         await newUser.save();
         return res.status(201).json({message: 'Account created successfully!'});
     } catch (error) {
