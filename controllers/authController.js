@@ -50,6 +50,8 @@ const login = async (req, res) => {
             user: {
                 username: user.username,
                 email: user.email,
+                asset_model: user.asset_model,
+                first_access: user.first_access
                 // Do not send password to frontend for security reasons
             }
         });
