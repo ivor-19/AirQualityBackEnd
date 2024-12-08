@@ -9,19 +9,19 @@ const getAQReadingsList = async (req, res) => {
     }
 }
 
-const getModelReading= async (req, res) => {
-    const {asset_model} = req.query;
+const getAQReadingsByAssetModel = async (req, res) => {
     try {
-        const asset = await AirQualityReading.findOne({asset_model});
-        if(!asset){
-            return res.status(400).json({message: "Can't find model"});
-        }
+        const { asset_model } = req.params;
+        const getList = await AirQualityReading.find({ asset_model });
 
-        res.status(201).json({message: 'Model found', asset})
+        if (getList.length === 0) {
+            return res.status(404).json({ message: `No data found for asset_model: ${asset_model}` });
+        }
+        res.json(getList);
     } catch (error) {
-        res.status(500).json({message: 'Error fetching model', error})
+        res.status(500).json({ message: 'Error fetching data for the asset_model', error });
     }
-}
+};
 
 const postAQReadings = async (req, res) => {
     const {aqi, pm2_5, co, no2, asset_model} = req.body;
@@ -35,4 +35,4 @@ const postAQReadings = async (req, res) => {
     }
 }
 
-module.exports = {getAQReadingsList, getModelReading, postAQReadings}
+module.exports = {getAQReadingsList, getAQReadingsByAssetModel, postAQReadings}
