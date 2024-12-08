@@ -71,4 +71,48 @@ const getUsers = async (req, res) => {
     }
 }
 
-module.exports = {signup, login, getUsers};
+const editUser = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { username, email, password, asset_model, first_access } = req.body;
+
+        // Find the user by ID
+        const user = await User.findById(id);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        // If password is being updated, hash it
+        if (password) {
+            const salt = await bcrypt.genSalt(10);
+            user.password = await bcrypt.hash(password, salt);
+        }
+
+        // Check if the username or email already exists (if it's not the same as the current user)
+        const usernameExists = username && username !== user.username ? await User.findOne({ username }) : null;
+        if (usernameExists) {
+            return res.status(400).json({ message: 'Username is already taken' });
+        }
+
+        const emailExists = email && email !== user.email ? await User.findOne({ email }) : null;
+        if (emailExists) {
+            return res.status(400).json({ message: 'Email is already taken' });
+        }
+
+        // Update the user's details
+        user.username = username || user.username;
+        user.email = email || user.email;
+        user.asset_model = asset_model || user.asset_model;
+        user.first_access = first_access || user.first_access;
+
+        // Save the updated user
+        await user.save();
+
+        return res.status(200).json({ message: 'User updated successfully', user });
+    } catch (error) {
+        console.error('Error editing user:', error);
+        res.status(500).json({ message: 'Server Error: Error editing user', error });
+    }
+};
+
+module.exports = {signup, login, getUsers, editUser};
