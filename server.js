@@ -10,6 +10,7 @@ const historyRoutes = require('./routes/historyRoutes');
 const latestaqRoutes = require('./routes/latestaqRoutes');
 const authRoutes = require('./routes/authRoutes');
 const assetRoutes = require('./routes/assetRoutes')
+const aqReadingRoutes = require('./routes/aqReadingRoutes')
 
 
 app.use(cors());
@@ -23,11 +24,12 @@ mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log('Connected to MongoDB'))
   .catch((err) => console.error('MongoDB connection error:', err));
 
-app.use('/api/students', studentRoutes)
-app.use('/api/history', historyRoutes)
-app.use('/api/latestaq', latestaqRoutes)
-app.use('/api/users', authRoutes)
-app.use('/api/assets', assetRoutes)
+app.use('/students', studentRoutes)
+app.use('/history', historyRoutes)
+app.use('/latestaq', latestaqRoutes)
+app.use('/users', authRoutes)
+app.use('/assets', assetRoutes)
+app.use('/aqReadings', aqReadingRoutes)
 
 app.listen(port, () => {
     console.log(`Server is running at port ${port}`)
