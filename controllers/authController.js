@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken');
 
 const signup = async (req, res) => {
     try {
-        const { username, email, password } = req.body;
+        const { username, email, password, asset_model, first_access } = req.body;
 
         const userExists = await User.findOne({ username });
         if(userExists){
