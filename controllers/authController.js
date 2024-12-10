@@ -53,15 +53,34 @@ const login = async (req, res) => {
     }
   };
 
-const getUsers = async (req, res) => {
+  const getUsers = async (req, res) => {
     try {
-        const getUsers = await User.find();
-        res.json(getUsers)
+        const page = parseInt(req.query.page) || 1; 
+        const limit = parseInt(req.query.limit) || 10; 
+
+        const skip = (page - 1) * limit;
+        const users = await User.find()
+                                 .skip(skip)    
+                                 .limit(limit)  
+                                 .exec();      
+
+        const totalUsers = await User.countDocuments();
+
+        res.json({
+            users,
+            pagination: {
+                totalUsers,
+                totalPages: Math.ceil(totalUsers / limit),  
+                currentPage: page,
+                perPage: limit
+            }
+        });
 
     } catch (error) {
-        res.status(500).json({message: 'Server Error: Error fetching data', error})
+        res.status(500).json({message: 'Server Error: Error fetching data', error});
     }
-}
+};
+
 
 const editUser = async (req, res) => {
     try {
