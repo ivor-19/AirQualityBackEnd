@@ -43,4 +43,17 @@ const postHistoryData = async (req, res) => {
     }
 }
 
-module.exports = {getHistoryData, postHistoryData};
+const deleteHistory = async (req, res) => {
+    const { id } = req.params;  
+    try {
+        const data = await History.findByIdAndDelete(id); 
+        if (!data) {
+            return res.status(400).json({ isSuccess: false, message: "Data not found" });
+        }
+        res.status(200).json({ isSuccess: true, message: 'History Data deleted successfully', data });
+    } catch (error) {
+        res.status(500).json({ isSuccess: false, message: 'Error deleting data history', error });
+    }
+}
+
+module.exports = {getHistoryData, postHistoryData, deleteHistory};
