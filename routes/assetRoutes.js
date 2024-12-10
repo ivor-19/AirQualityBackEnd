@@ -4,7 +4,7 @@ const router = express.Router();
 
 
 router.get('/', getAssetList)
-router.post('/getAsset', getAssetName)
+router.post('/getAssetName', getAssetName)
 router.post('/addAsset', postAssetNames)
 router.delete('/deleteAsset/:id', deleteAsset)
 
