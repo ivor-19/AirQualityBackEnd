@@ -15,6 +15,7 @@ const getAQReadingsList = async (req, res) => {
         const lastPage = Math.ceil(totalAQReadings / limit);
 
         res.json({
+            isSuccess: true,
             aqReadings,
             pagination: {
                 total: totalAQReadings,            // Total number of users
@@ -34,11 +35,11 @@ const getAQReadingsByAssetModel = async (req, res) => {
         const getList = await AirQualityReading.find({ asset_model });
 
         if (getList.length === 0) {
-            return res.status(404).json({ message: `No data found for asset_model: ${asset_model}` });
+            return res.status(404).json({ isSuccess: false, message: `No data found for asset_model: ${asset_model}` });
         }
         res.json(getList);
     } catch (error) {
-        res.status(500).json({ message: 'Error fetching data for the asset_model', error });
+        res.status(500).json({ isSuccess: false, message: 'Error fetching data for the asset_model', error });
     }
 };
 
@@ -48,9 +49,9 @@ const postAQReadings = async (req, res) => {
     try {
         await newData.save();
         const getList = await AirQualityReading.find();
-        res.status(201).json({message: 'New data is saved', getList})
+        res.status(201).json({isSuccess: true, message: 'New data is saved', getList})
     } catch (error) {
-        res.status(500).json({message: 'Error saving data: ', error})
+        res.status(500).json({isSuccess: false, message: 'Error saving data: ', error})
     }
 }
 

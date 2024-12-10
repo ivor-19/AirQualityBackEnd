@@ -15,6 +15,7 @@ const getHistoryData = async (req, res) => {
         const lastPage = Math.ceil(totalHistory / limit);
 
         res.json({
+            isSuccess: true,
             history,
             pagination: {
                 total: totalHistory,            // Total number of users
@@ -24,7 +25,7 @@ const getHistoryData = async (req, res) => {
             }
         });
     } catch (error) {
-        res.status(500).json({message: 'Error fetching data', error})
+        res.status(500).json({ isSuccess: false, message: 'Error fetching data', error})
     }
 }
 
@@ -36,9 +37,9 @@ const postHistoryData = async (req, res) => {
     try {
         await newData.save();
         const getList = await History.find();
-        res.status(201).json({message: 'New data is saved: ', getList})
+        res.status(201).json({ isSuccess: true, message: 'New data is saved: ', getList})
     } catch (error) {
-        res.status(500).json({message: 'Error saving data: ', error})
+        res.status(500).json({ isSuccess: false, message: 'Error saving data: ', error})
     }
 }
 

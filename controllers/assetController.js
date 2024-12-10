@@ -15,6 +15,7 @@ const getAssetList= async (req, res) => {
         const lastPage = Math.ceil(totalAsset / limit);
 
         res.json({
+            isSuccess: true,
             asset,
             pagination: {
                 total: totalAsset,            // Total number of users
@@ -33,12 +34,12 @@ const getAssetName= async (req, res) => {
     try {
         const asset = await Asset.findOne({assetName});
         if(!asset){
-            return res.status(400).json({message: "Can't find asset name"});
+            return res.status(400).json({isSuccess: false, message: "Can't find asset name"});
         }
 
-        res.status(201).json({message: 'Asset name found', asset})
+        res.status(201).json({isSuccess: true, message: 'Asset name found', asset})
     } catch (error) {
-        res.status(500).json({message: 'Error fetching assets', error})
+        res.status(500).json({isSuccess: false, message: 'Error fetching assets', error})
     }
 }
 
@@ -48,9 +49,9 @@ const postAssetNames = async (req, res) => {
     try {
         await newAssetName.save();
         const getList = await Asset.find();
-        res.status(201).json({message: 'New asset added', getList});
+        res.status(201).json({isSuccess: true, message: 'New asset added', getList});
     } catch (error) {
-        res.status(500).json({message: 'Error adding asset', error})
+        res.status(500).json({isSuccess: false, message: 'Error adding asset', error})
     }
 }
 
@@ -59,11 +60,11 @@ const deleteAsset = async (req, res) => {
     try {
         const asset = await Asset.findByIdAndDelete(id); 
         if (!asset) {
-            return res.status(400).json({ message: "Asset not found" });
+            return res.status(400).json({ isSuccess: false, message: "Asset not found" });
         }
-        res.status(200).json({ message: 'Asset deleted successfully', asset });
+        res.status(200).json({ isSuccess: true, message: 'Asset deleted successfully', asset });
     } catch (error) {
-        res.status(500).json({ message: 'Error deleting asset', error });
+        res.status(500).json({ isSuccess: false, message: 'Error deleting asset', error });
     }
 }
 
