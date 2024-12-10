@@ -60,7 +60,7 @@ const getUsers = async (req, res) => {
         const limit = parseInt(req.query.limit) || 10; 
 
         const skip = (page - 1) * limit;
-        const user = await User.find()
+        const users = await User.find()
                                  .skip(skip)   
                                  .limit(limit)  
                                  .exec();      
@@ -70,7 +70,7 @@ const getUsers = async (req, res) => {
 
         res.json({
             isSuccess: true,
-            user,
+            users,
             pagination: {
                 total: totalUsers,            // Total number of users
                 per_page: limit,              // Number of users per page
