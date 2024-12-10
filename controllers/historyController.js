@@ -6,7 +6,7 @@ const getHistoryData = async (req, res) => {
         const limit = parseInt(req.query.limit) || 6; 
 
         const skip = (page - 1) * limit;
-        const historyList = await History.find()
+        const history = await History.find()
                                  .skip(skip)   
                                  .limit(limit)  
                                  .exec();      
@@ -15,7 +15,7 @@ const getHistoryData = async (req, res) => {
         const lastPage = Math.ceil(totalHistory / limit);
 
         res.json({
-            historyList,
+            history,
             pagination: {
                 total: totalHistory,            // Total number of users
                 per_page: limit,              // Number of users per page
