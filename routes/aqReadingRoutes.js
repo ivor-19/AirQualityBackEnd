@@ -4,6 +4,6 @@ const router = express.Router();
 
 router.get('/', getAQReadingsList);
 router.get('/:asset_model', getAQReadingsByAssetModel)
-router.post('/', postAQReadings)
+router.post('/addAQReadings', postAQReadings)
 
 module.exports = router;
