@@ -55,9 +55,9 @@ const postAssetNames = async (req, res) => {
 }
 
 const deleteAsset = async (req, res) => {
-    const { assetName } = req.body;
+    const { id } = req.params;  
     try {
-        const asset = await Asset.findOneAndDelete({ assetName });
+        const asset = await Asset.findByIdAndDelete(id); 
         if (!asset) {
             return res.status(400).json({ message: "Asset not found" });
         }
