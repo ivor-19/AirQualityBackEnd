@@ -2,8 +2,27 @@ const Asset = require('../models/Asset');
 
 const getAssetList= async (req, res) => {
     try {
-        const getList = await Asset.find();
-        res.json(getList);
+        const page = parseInt(req.query.page) || 1;  
+        const limit = parseInt(req.query.limit) || 6; 
+
+        const skip = (page - 1) * limit;
+        const asset = await Asset.find()
+                                 .skip(skip)   
+                                 .limit(limit)  
+                                 .exec();      
+
+        const totalAsset = await Asset.countDocuments();
+        const lastPage = Math.ceil(totalAsset / limit);
+
+        res.json({
+            asset,
+            pagination: {
+                total: totalAsset,            // Total number of users
+                per_page: limit,              // Number of users per page
+                current_page: page,           // Current page number
+                last_page: lastPage           // Last page number
+            }
+        });
     } catch (error) {
         res.status(500).json({message: 'Error fetching assets', error})
     }
