@@ -1,9 +1,9 @@
 const express = require('express');
+const { postAQReadings, getAQReadingsByAssetModel, getAQReadingsList } = require('../controllers/aqReadingController');
 const router = express.Router();
-const aqReadingController = require('../controllers/aqReadingController');
 
-router.get('/', aqReadingController.getAQReadingsList);
-router.get('/:asset_model', aqReadingController.getAQReadingsByAssetModel)
-router.post('/', aqReadingController.postAQReadings)
+router.get('/', getAQReadingsList);
+router.get('/:asset_model', getAQReadingsByAssetModel)
+router.post('/', postAQReadings)
 
 module.exports = router;

@@ -1,8 +1,8 @@
 const express = require('express');
+const { getHistoryData, postHistoryData } = require('../controllers/historyController');
 const router = express.Router();
-const historyController = require('../controllers/historyController');
 
-router.get('/', historyController.getHistoryData);
-router.post('/', historyController.postHistoryData);
+router.get('/', getHistoryData);
+router.post('/', postHistoryData);
 
 module.exports = router;

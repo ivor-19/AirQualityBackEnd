@@ -54,4 +54,17 @@ const postAssetNames = async (req, res) => {
     }
 }
 
-module.exports = {getAssetList, getAssetName, postAssetNames}
+const deleteAsset = async (req, res) => {
+    const { assetName } = req.body;
+    try {
+        const asset = await Asset.findOneAndDelete({ assetName });
+        if (!asset) {
+            return res.status(400).json({ message: "Asset not found" });
+        }
+        res.status(200).json({ message: 'Asset deleted successfully', asset });
+    } catch (error) {
+        res.status(500).json({ message: 'Error deleting asset', error });
+    }
+}
+
+module.exports = {getAssetList, getAssetName, postAssetNames, deleteAsset}
