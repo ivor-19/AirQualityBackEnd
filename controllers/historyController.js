@@ -2,8 +2,27 @@ const History = require('../models/History');
 
 const getHistoryData = async (req, res) => {
     try {
-        const getList = await History.find();
-        res.json(getList);
+        const page = parseInt(req.query.page) || 1;  
+        const limit = parseInt(req.query.limit) || 6; 
+
+        const skip = (page - 1) * limit;
+        const historyList = await History.find()
+                                 .skip(skip)   
+                                 .limit(limit)  
+                                 .exec();      
+
+        const totalHistory = await History.countDocuments();
+        const lastPage = Math.ceil(totalHistory / limit);
+
+        res.json({
+            historyList,
+            pagination: {
+                total: totalHistory,            // Total number of users
+                per_page: limit,              // Number of users per page
+                current_page: page,           // Current page number
+                last_page: lastPage           // Last page number
+            }
+        });
     } catch (error) {
         res.status(500).json({message: 'Error fetching data', error})
     }
