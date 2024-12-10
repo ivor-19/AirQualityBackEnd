@@ -6,6 +6,6 @@ router.post('/signup', signup);
 router.post('/login', login);
 router.get('/', getUsers)
 router.put('/editUser/:id', editUser)
-router.delete('/deleteUser/:id', deleteUser)
+router.post('/deleteUser/:id', deleteUser) // Delete
 
 module.exports = router;
