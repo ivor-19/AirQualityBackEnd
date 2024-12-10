@@ -115,4 +115,17 @@ const editUser = async (req, res) => {
     }
 };
 
-module.exports = {signup, login, getUsers, editUser};
+const deleteUser = async (req, res) => {
+    const { id } = req.params;  
+    try {
+        const user = await User.findByIdAndDelete(id); 
+        if (!user) {
+            return res.status(400).json({ isSuccess: false, message: "User not found" });
+        }
+        res.status(200).json({ isSuccess: true, message: 'User deleted successfully', user });
+    } catch (error) {
+        res.status(500).json({ isSuccess: false, message: 'Error deleting user', error });
+    }
+}
+
+module.exports = {signup, login, getUsers, editUser, deleteUser};
