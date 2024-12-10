@@ -2,8 +2,27 @@ const AirQualityReading = require('../models/AirQualityReading');
 
 const getAQReadingsList = async (req, res) => {
     try {
-        const getList = await AirQualityReading.find();
-        res.json(getList);
+        const page = parseInt(req.query.page) || 1;  
+        const limit = parseInt(req.query.limit) || 10; 
+
+        const skip = (page - 1) * limit;
+        const aqReadings = await AirQualityReading.find()
+                                 .skip(skip)   
+                                 .limit(limit)  
+                                 .exec();      
+
+        const totalAQReadings = await AirQualityReading.countDocuments();
+        const lastPage = Math.ceil(totalAQReadings / limit);
+
+        res.json({
+            aqReadings,
+            pagination: {
+                total: totalAQReadings,            // Total number of users
+                per_page: limit,              // Number of users per page
+                current_page: page,           // Current page number
+                last_page: lastPage           // Last page number
+            }
+        });
     } catch (error) {
         res.status(500).json({message: 'Error fetching data', error})
     }
