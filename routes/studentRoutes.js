@@ -6,4 +6,4 @@ router.get('/getList', getStudentList);
 router.post('/addStudent', addStudentData);
 router.post('/deleteStudent', deleteStudent);
 
-module.exports(router);
+module.exports = router;
