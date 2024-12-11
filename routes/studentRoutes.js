@@ -4,6 +4,6 @@ const router = express.Router();
 
 router.get('/getList', getStudentList);
 router.post('/addStudent', addStudentData);
-router.post('/deleteStudent', deleteStudent);
+router.post('/deleteStudent/:id', deleteStudent); // Added `:id` for delete route
 
-module.exports = router;
+module.exports = router;  // Corrected export
