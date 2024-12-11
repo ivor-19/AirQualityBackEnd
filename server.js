@@ -11,6 +11,7 @@ const latestaqRoutes = require('./routes/latestaqRoutes');
 const authRoutes = require('./routes/authRoutes');
 const assetRoutes = require('./routes/assetRoutes')
 const aqReadingRoutes = require('./routes/aqReadingRoutes')
+const emailRoutes = require('./routes/emailRoutes');
 
 
 app.use(cors());
@@ -30,6 +31,7 @@ app.use('/latestaq', latestaqRoutes)
 app.use('/users', authRoutes)
 app.use('/assets', assetRoutes)
 app.use('/aqReadings', aqReadingRoutes)
+app.use('/email', emailRoutes)
 
 app.listen(port, () => {
     console.log(`Server is running at port ${port}`)

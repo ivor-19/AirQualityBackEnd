@@ -17,12 +17,12 @@ const getHistoryData = async (req, res) => {
         res.json({
             isSuccess: true,
             history,
-            // pagination: {
-            //     total: totalHistory,            // Total number of users
-            //     per_page: limit,              // Number of users per page
-            //     current_page: page,           // Current page number
-            //     last_page: lastPage           // Last page number
-            // }
+            pagination: {
+                total: totalHistory,            // Total number of users
+                per_page: limit,              // Number of users per page
+                current_page: page,           // Current page number
+                last_page: lastPage           // Last page number
+            }
         });
     } catch (error) {
         res.status(500).json({ isSuccess: false, message: 'Error fetching data', error})
