@@ -15,7 +15,7 @@ const sendEmail = async (req, res) => {
 
   // Setup email options
   const mailOptions = {
-    from: 'ivorcruz19@gmail.com', // Sender email
+    from: process.env.EMAIL_USER, // Sender email
     to,
     subject,
     text: message, // Plain text message
