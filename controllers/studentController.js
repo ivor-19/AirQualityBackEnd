@@ -57,14 +57,14 @@ const deleteStudent = async (req, res) => {
 }
 
 const getEmails = async (req, res) => {
-    const {email} = req.body;
     try {
-        const email = await Student.find({email});
-        if(!email){
-            return res.status(400).json({isSuccess: false, message: "Can't find asset name"});
-        }
+        const emails = await Student.find({}).select('email');
 
-        res.status(201).json({isSuccess: true, message: 'emails name found', asset})
+        res.status(200).json({
+            isSuccess: true,
+            message: 'Emails retrieved successfully',
+            emails
+        })
     } catch (error) {
         res.status(500).json({isSuccess: false, message: 'Error fetching emails', error})
     }
