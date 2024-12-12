@@ -56,4 +56,18 @@ const deleteStudent = async (req, res) => {
     }
 }
 
-module.exports = {getStudentList, addStudent, deleteStudent};
+const getEmails = async (req, res) => {
+    const {email} = req.body;
+    try {
+        const email = await Student.find({email});
+        if(!email){
+            return res.status(400).json({isSuccess: false, message: "Can't find asset name"});
+        }
+
+        res.status(201).json({isSuccess: true, message: 'emails name found', asset})
+    } catch (error) {
+        res.status(500).json({isSuccess: false, message: 'Error fetching emails', error})
+    }
+}
+
+module.exports = {getStudentList, addStudent, deleteStudent, getEmails};
