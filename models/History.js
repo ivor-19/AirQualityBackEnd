@@ -9,7 +9,7 @@ const historySchema = new mongoose.Schema({
     no2: Number,
     scanned_by: String,
     scanned_using_model: String,
-    
+    message: String,
   });
   
 const History = mongoose.model('History', historySchema);
