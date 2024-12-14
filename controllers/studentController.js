@@ -112,4 +112,30 @@ const getEmails = async (req, res) => {
     }
 }
 
-module.exports = {getStudentList, addStudent, deleteStudent, getEmails};
+const editStudent = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { student_id, name, email, phone_number } = req.body;
+
+        const student = await Student.findById(id);
+        if(!student){
+            res.status(404).json({ isSuccess: false, message: 'Student not found ', error});
+        }
+
+        student.student_id = student_id || student.student_id;
+        student.name = name || student.name;
+        student.email = email || student.email;
+        student.phone_number = phone_number || student.phone_number;
+
+        await student.save();
+        res.status(200).json({ isSuccess: true, message: 'Student updated successfully', student})
+
+    } catch (error) {
+        console.error('Error editing user:', error);
+        res.status(500).json({ isSuccess: false, message: 'Server Error: Error editing user', error });
+    }
+};
+
+
+
+module.exports = {getStudentList, addStudent, deleteStudent, getEmails, editStudent};
