@@ -1,4 +1,6 @@
 const Student = require('../models/Student');
+const XLSX = require('xlsx');
+const upload = require('../middlewares/fileUploadMiddleware');
 
 const getStudentList = async (req, res) => {
     try {
@@ -136,6 +138,40 @@ const editStudent = async (req, res) => {
     }
 };
 
+const importExcel = (req, res) => {
+    upload(req, res, async (err) => {
+        if (err) {
+            return res.status(500).json({ isSuccess: false, message: 'Error uploading file', error: err.message });
+        }
+
+        try {
+            // Read the uploaded Excel file
+            const workbook = XLSX.readFile(req.file.path);
+            const sheet_name_list = workbook.SheetNames;
+            const sheet = workbook.Sheets[sheet_name_list[0]]; // Get the first sheet
+
+            // Parse the sheet into JSON data
+            const data = XLSX.utils.sheet_to_json(sheet);
+
+            // Iterate over the data and save to the database
+            for (const row of data) {
+                const { student_id, name, email, phone_number } = row;
+
+                // Check if student already exists
+                const existingStudent = await Student.findOne({ student_id });
+                if (!existingStudent) {
+                    const newStudent = new Student({ student_id, name, email, phone_number });
+                    await newStudent.save();
+                }
+            }
+
+            // Respond with success message
+            res.status(200).json({ isSuccess: true, message: 'Students imported successfully' });
+        } catch (error) {
+            res.status(500).json({ isSuccess: false, message: 'Error importing students', error: error.message });
+        }
+    });
+};
 
 
-module.exports = {getStudentList, addStudent, deleteStudent, getEmails, editStudent};
+module.exports = {getStudentList, addStudent, deleteStudent, getEmails, editStudent, importExcel};
