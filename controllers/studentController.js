@@ -4,7 +4,9 @@ const path = require('path');
 const xlsx = require('xlsx');
 
 const saveFile = (file) => {
-    const uploadDir = path.join('../tmp', 'uploads');
+    const uploadDir = process.env.VERCEL
+    ? path.join('/tmp', 'uploads') // Vercel uses /tmp for file storage
+    : path.join(__dirname, '../tmp');
     // Ensure the uploads directory exists
     if (!fs.existsSync(uploadDir)) {
         fs.mkdirSync(uploadDir, { recursive: true }); 
