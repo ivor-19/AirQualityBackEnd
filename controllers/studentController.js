@@ -1,6 +1,82 @@
 const Student = require('../models/Student');
-const XLSX = require('xlsx');
-const upload = require('../middlewares/fileUploadMiddleware');
+const fs = require('fs');
+const path = require('path');
+const xlsx = require('xlsx');
+
+const saveFile = (file) => {
+    const uploadDir = path.join(__dirname, '../uploads');
+    if (!fs.existsSync(uploadDir)) {
+        fs.mkdirSync(uploadDir);
+    }
+
+    const fileName = Date.now() + path.extname(file.name);
+    const filePath = path.join(uploadDir, fileName);
+
+    file.mv(filePath, (err) => {
+        if (err) {
+            throw new Error('Error uploading file: ' + err);
+        }
+    });
+
+    return filePath;
+};
+
+const uploadExcel = async (req, res) => {
+    try {
+        if (!req.files || !req.files.excelFile) {
+            return res.status(400).json({ isSuccess: false, message: 'No file uploaded' });
+        }
+
+        // Save the Excel file temporarily
+        const excelFilePath = saveFile(req.files.excelFile);
+
+        // Read the Excel file using xlsx library
+        const workbook = xlsx.readFile(excelFilePath);
+        const sheetName = workbook.SheetNames[0]; // Assuming the data is in the first sheet
+        const worksheet = workbook.Sheets[sheetName];
+
+        // Convert Excel data to JSON
+        const data = xlsx.utils.sheet_to_json(worksheet);
+
+        // Iterate over each row and save student data
+        const savedStudents = [];
+        for (let row of data) {
+            const { student_id, name, email, phone_number } = row;
+
+            if (!student_id || !name || !email || !phone_number) {
+                continue; // Skip if required data is missing
+            }
+
+            const newStudent = new Student({
+                student_id,
+                name,
+                email,
+                phone_number,
+            });
+
+            try {
+                await newStudent.save();
+                savedStudents.push(newStudent);
+            } catch (error) {
+                console.error('Error saving student:', error);
+            }
+        }
+
+        // Return success message with number of students added
+        res.status(200).json({
+            isSuccess: true,
+            message: `${savedStudents.length} students added successfully`,
+            savedStudents,
+        });
+
+        // Optionally, you can remove the file after processing
+        fs.unlinkSync(excelFilePath);
+
+    } catch (error) {
+        console.error('Error processing Excel file:', error);
+        res.status(500).json({ isSuccess: false, message: 'Error processing Excel file', error });
+    }
+};
 
 const getStudentList = async (req, res) => {
     try {
@@ -138,40 +214,6 @@ const editStudent = async (req, res) => {
     }
 };
 
-const importExcel = (req, res) => {
-    upload(req, res, async (err) => {
-        if (err) {
-            return res.status(500).json({ isSuccess: false, message: 'Error uploading file', error: err.message });
-        }
-
-        try {
-            // Read the uploaded Excel file
-            const workbook = XLSX.readFile(req.file.path);
-            const sheet_name_list = workbook.SheetNames;
-            const sheet = workbook.Sheets[sheet_name_list[0]]; // Get the first sheet
-
-            // Parse the sheet into JSON data
-            const data = XLSX.utils.sheet_to_json(sheet);
-
-            // Iterate over the data and save to the database
-            for (const row of data) {
-                const { student_id, name, email, phone_number } = row;
-
-                // Check if student already exists
-                const existingStudent = await Student.findOne({ student_id });
-                if (!existingStudent) {
-                    const newStudent = new Student({ student_id, name, email, phone_number });
-                    await newStudent.save();
-                }
-            }
-
-            // Respond with success message
-            res.status(200).json({ isSuccess: true, message: 'Students imported successfully' });
-        } catch (error) {
-            res.status(500).json({ isSuccess: false, message: 'Error importing students', error: error.message });
-        }
-    });
-};
 
 
-module.exports = {getStudentList, addStudent, deleteStudent, getEmails, editStudent, importExcel};
+module.exports = {getStudentList, addStudent, deleteStudent, getEmails, editStudent, uploadExcel};
