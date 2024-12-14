@@ -4,30 +4,71 @@ const getStudentList = async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;  
         const limit = parseInt(req.query.limit) || 10; 
-
         const skip = (page - 1) * limit;
-        const student = await Student.find()
-                                 .skip(skip)   
-                                 .limit(limit)  
-                                 .exec();      
 
-        const totalStudent = await Student.countDocuments();
+        // Extract filters from the query parameters
+        const filters = {
+            student_id: req.query.student_id || null,
+            name: req.query.name || null,
+            email: req.query.email || null,
+            phone_number: req.query.phone_number || null,
+            search: req.query.search || null,
+        };
+
+        // Build the query object
+        const query = {};
+
+        if (filters.student_id) {
+            query.student_id = filters.student_id;
+        }
+
+        if (filters.name) {
+            query.name = { $regex: filters.name, $options: 'i' }; // Case-insensitive partial match
+        }
+
+        if (filters.email) {
+            query.email = { $regex: filters.email, $options: 'i' };
+        }
+
+        if (filters.phone_number) {
+            query.phone_number = { $regex: filters.phone_number, $options: 'i' };
+        }
+
+        if (filters.search) {
+            query.$or = [
+                { name: { $regex: filters.search, $options: 'i' } },
+                { email: { $regex: filters.search, $options: 'i' } },
+                { phone_number: { $regex: filters.search, $options: 'i' } },
+            ];
+        }
+
+        // Execute the query with pagination
+        const students = await Student.find(query)
+                                      .skip(skip)
+                                      .limit(limit)
+                                      .exec();
+
+        const totalStudent = await Student.countDocuments(query); // Count with filters applied
         const lastPage = Math.ceil(totalStudent / limit);
 
         res.json({
             isSuccess: true,
-            student,
+            students,
             pagination: {
-                total: totalStudent,            // Total number of students
-                per_page: limit,              // Number of students per page
-                current_page: page,           // Current page number
-                last_page: lastPage           // Last page number
+                total: totalStudent,           // Total number of students
+                per_page: limit,               // Number of students per page
+                current_page: page,            // Current page number
+                last_page: lastPage            // Last page number
             }
         });
     } catch (error) {
-        res.status(500).json({ isSuccess: false, message: 'Error fetching data', error})
+        res.status(500).json({ 
+            isSuccess: false, 
+            message: 'Error fetching data', 
+            error 
+        });
     }
-}
+};
 
 
 const addStudent = async (req, res) => {
