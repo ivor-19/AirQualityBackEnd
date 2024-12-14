@@ -58,6 +58,7 @@ const getUsers = async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;  
         const limit = parseInt(req.query.limit) || 10; 
+        const skip = (page - 1) * limit;
 
         const filters = {
             username: req.query.username || null,
@@ -81,15 +82,13 @@ const getUsers = async (req, res) => {
 
         if(filters.search){
             query.$or = [
-                { username: {$regex: filters.search, $options: 'i'}},
-                { email: {$regex: filters.search, $options: 'i'}},
-                { asset_model: {$regex: filters.search, $options: 'i'}},
+                { username: {$regex: filters.search, $options: 'i'} },
+                { email: { $regex: filters.search, $options: 'i'} },
+                { asset_model: { $regex: filters.search, $options: 'i'} },
             ]
         }
 
-
-        const skip = (page - 1) * limit;
-        const users = await User.find()
+        const users = await User.find(query)
                                  .skip(skip)   
                                  .limit(limit)  
                                  .exec();      
