@@ -4,7 +4,7 @@ const path = require('path');
 const xlsx = require('xlsx');
 
 const saveFile = (file) => {
-    const uploadDir = path.join(__dirname, '../uploads');
+    const uploadDir = path.join('../tmp', 'uploads');
     // Ensure the uploads directory exists
     if (!fs.existsSync(uploadDir)) {
         fs.mkdirSync(uploadDir, { recursive: true }); 
