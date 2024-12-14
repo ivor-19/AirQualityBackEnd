@@ -19,7 +19,7 @@ const getStudentList = async (req, res) => {
         const query = {};
 
         if (filters.student_id) {
-            query.student_id = filters.student_id;
+            query.student_id = { $reges: filters.student_id, $options: 'i'};
         }
 
         if (filters.name) {
@@ -36,6 +36,7 @@ const getStudentList = async (req, res) => {
 
         if (filters.search) {
             query.$or = [
+                { student_id: { $regex: filters.search, $options: 'i' } },
                 { name: { $regex: filters.search, $options: 'i' } },
                 { email: { $regex: filters.search, $options: 'i' } },
                 { phone_number: { $regex: filters.search, $options: 'i' } },
@@ -48,7 +49,7 @@ const getStudentList = async (req, res) => {
                                       .limit(limit)
                                       .exec();
 
-        const totalStudent = await Student.countDocuments(query); // Count with filters applied
+        const totalStudent = await Student.countDocuments(query); 
         const lastPage = Math.ceil(totalStudent / limit);
 
         res.json({

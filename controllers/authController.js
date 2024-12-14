@@ -59,13 +59,42 @@ const getUsers = async (req, res) => {
         const page = parseInt(req.query.page) || 1;  
         const limit = parseInt(req.query.limit) || 10; 
 
+        const filters = {
+            username: req.query.username || null,
+            email: req.query.email || null,
+            asset_model: req.query.asset_model || null,
+            search: req.query.search || null,
+        }
+        const query = {};
+
+        if(filters.username){
+            query.username = { $regex: filters.username, $options: 'i'}
+        }
+
+        if(filters.email){
+            query.email = { $regex: filters.email, $options: 'i'}
+        }
+
+        if(filters.asset_model){
+            query.asset_model = { $regex: filters.asset_model, $options: 'i'}
+        }
+
+        if(filters.search){
+            query.$or = [
+                { username: {$regex: filters.search, $options: 'i'}},
+                { email: {$regex: filters.search, $options: 'i'}},
+                { asset_model: {$regex: filters.search, $options: 'i'}},
+            ]
+        }
+
+
         const skip = (page - 1) * limit;
         const users = await User.find()
                                  .skip(skip)   
                                  .limit(limit)  
                                  .exec();      
 
-        const totalUsers = await User.countDocuments();
+        const totalUsers = await User.countDocuments(query);
         const lastPage = Math.ceil(totalUsers / limit);
 
         res.json({
