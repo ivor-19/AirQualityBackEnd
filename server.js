@@ -17,7 +17,7 @@ const emailRoutes = require('./routes/emailRoutes');
 
 app.use(cors());
 app.use(express.json());
-app/use(fileUpload());
+app.use(fileUpload());
 
 // console.log('JWT_SECRET:', process.env.JWT_SECRET);
 const port = process.env.PORT || 5000;
