@@ -1,5 +1,5 @@
 const express = require('express');
-const { add } = require('../controllers/protoespController');
+const add = require('../controllers/protoespController');
 const router = express.Router();
 
 router.post('/addEsp', add);
