@@ -11,6 +11,18 @@ const getList = async(req, res) => {
   }
 }
 
+const addReadings = async (req, res) => {
+  const {temperature, humidity, asset_model} = req.body;
+  const newData = new ProtoEsp({temperature, humidity, asset_model});
+  try {
+      await newData.save();
+      const getList = await ProtoEsp.find();
+      res.status(201).json({isSuccess: true, message: 'New data is saved', getList})
+  } catch (error) {
+      res.status(500).json({isSuccess: false, message: 'Error saving data: ', error})
+  }
+}
+
 const updateReadings = async (req, res) => {
   const {temperature, humidity} = req.body;
 
@@ -29,4 +41,4 @@ const updateReadings = async (req, res) => {
 
 }
 
-module.exports = {getList, updateReadings};
+module.exports = {getList, addReadings, updateReadings};
