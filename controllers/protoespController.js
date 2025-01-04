@@ -15,7 +15,7 @@ const updateReadings = async (req, res) => {
   const {temperature, humidity} = req.body;
 
   try{
-    const newReadings = new ProtoEsp.findOneAndUpdate({}, {temperature, humidity}, {new: True});
+    const newReadings = await ProtoEsp.findOneAndUpdate({}, {temperature, humidity}, {new: True});
     if(!newReadings){
       return res.status(404).json({message: 'No data found to update'})
     }
