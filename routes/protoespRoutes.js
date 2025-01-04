@@ -1,8 +1,8 @@
 const express = require('express');
-const {getList, add} = require('../controllers/protoespController');
+const {getList, updateReadings} = require('../controllers/protoespController');
 const router = express.Router();
 
 router.get('/getEsp', getList);
-router.post('/addEsp', add);
+router.post('/updateEsp', updateReadings);
 
 module.exports = router;  // Corrected export

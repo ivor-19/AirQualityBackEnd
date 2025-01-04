@@ -11,12 +11,12 @@ const getList = async(req, res) => {
   }
 }
 
-const add = async (req, res) => {
-  const {name} = req.body;
-  const newName = new ProtoEsp({name});
+const updateReadings = async (req, res) => {
+  const {temperature, humidity} = req.body;
+  const newReadings = new ProtoEsp({temperature, humidity});
 
   try{
-    await newName.save();
+    await newReadings.save();
     res.status(201).json({message: 'Success esp'});
   }
   catch(error){
@@ -24,4 +24,4 @@ const add = async (req, res) => {
   }
 }
 
-module.exports = {getList, add};
+module.exports = {getList, updateReadings};
