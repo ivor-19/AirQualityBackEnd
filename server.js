@@ -35,7 +35,7 @@ app.use('/users', authRoutes)
 app.use('/assets', assetRoutes)
 app.use('/aqReadings', aqReadingRoutes)
 app.use('/email', emailRoutes)
-app.use('/esp', protoespRoutes);
+app.use('/esp', protoespRoutes)
 
 app.listen(port, () => {
     console.log(`Server is running at port ${port}`)
