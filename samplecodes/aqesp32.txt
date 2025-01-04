@@ -1,0 +1,73 @@
+#include <WiFi.h>
+#include <HTTPClient.h>
+
+#define LEDPIN_GREEN 32
+#define LEDPIN_BLUE 33
+
+// Replace with your network credentials
+const char *ssid = "Wokwi-GUEST";
+const char *password = "";
+
+// Vercel API endpoint URL
+const String apiUrl = "https://air-quality-back-end-v2.vercel.app/esp/updateEsp";
+
+// Data you want to send (e.g., 'name')
+int temperature = 43;  // Example data, this could be dynamically set
+int humidity = 60;
+
+void setup() {
+  Serial.begin(115200);
+  Serial.print("Connecting to WiFi");
+  WiFi.begin(ssid, password);
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(100);
+    Serial.print(".");
+  }
+  Serial.println("Connected to WiFi");
+
+  Serial.println("Hello, ESP32!");
+  pinMode(LEDPIN_GREEN, OUTPUT);
+  pinMode(LEDPIN_BLUE, OUTPUT);
+  Serial.println("Server will start in 3 secs");
+  delay(10);
+}
+
+void loop() {
+  // put your main code here, to run repeatedly:
+  Serial.println("Reading...");
+  digitalWrite(LEDPIN_BLUE, HIGH);
+  sendDataToAPI(temperature, humidity);
+  digitalWrite(LEDPIN_GREEN, HIGH);
+  Serial.println("Sent successfully");
+  delay(1000);
+  digitalWrite(LEDPIN_GREEN, LOW);
+  
+}
+
+void sendDataToAPI(int temperature, int humidity) {
+  HTTPClient http;
+
+  // Start HTTP request
+  http.begin(apiUrl);
+
+  // Set the content type to JSON
+  http.addHeader("Content-Type", "application/json");
+
+  // Create a JSON body
+  String jsonBody = "{\"temperature\":" + String(temperature) + ",\"humidity\":" + String(humidity) + "}";
+
+  // Send HTTP POST request
+  int httpResponseCode = http.POST(jsonBody);
+
+  // Check the response
+  if (httpResponseCode > 0) {
+    Serial.print("HTTP Response code: ");
+    Serial.println(httpResponseCode);
+  } else {
+    Serial.print("Error code: ");
+    Serial.println(httpResponseCode);
+  }
+
+  // Close the connection
+  http.end();
+}

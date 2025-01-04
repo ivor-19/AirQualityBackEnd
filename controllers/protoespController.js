@@ -13,11 +13,13 @@ const getList = async(req, res) => {
 
 const updateReadings = async (req, res) => {
   const {temperature, humidity} = req.body;
-  const newReadings = new ProtoEsp({temperature, humidity});
 
   try{
-    await newReadings.save();
-    res.status(201).json({message: 'Success esp'});
+    const newReadings = new ProtoEsp.findOneAndUpdate({}, {temperature, humidity}, {new: True});
+    if(!newReadings){
+      return res.status(404).json({message: 'No data found to update'})
+    }
+    res.status(201).json({message: 'Updated Successfully', newReadings});
   }
   catch(error){
     res.status(500).json({message: 'Error adding in esp', error});
