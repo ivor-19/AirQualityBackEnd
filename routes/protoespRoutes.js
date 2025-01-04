@@ -4,6 +4,6 @@ const router = express.Router();
 
 router.get('/getEsp', getList);
 router.post('/addEsp', addReadings);
-router.post('/updateEsp', updateReadings);
+router.post('/updateEsp/:asset_model', updateReadings);
 
 module.exports = router;  // Corrected export
