@@ -1,5 +1,16 @@
 const ProtoEsp = require('../models/ProtoEsp');
 
+
+const getList = async(req, res) => {
+  try{
+    const list = await ProtoEsp.find();
+    res.json(list);
+  }
+  catch(error){
+    res.status(500).json({message: 'Error fetching data', error})
+  }
+}
+
 const add = async (req, res) => {
   const {name} = req.body;
   const newName = new ProtoEsp({name});
@@ -13,4 +24,4 @@ const add = async (req, res) => {
   }
 }
 
-module.exports = add;
+module.exports = {getList, add};
