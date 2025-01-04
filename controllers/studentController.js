@@ -9,7 +9,6 @@ const getStudentList = async (req, res) => {
         const limit = parseInt(req.query.limit) || 10; 
         const skip = (page - 1) * limit;
 
-        // Extract filters from the query parameters
         const filters = {
             student_id: req.query.student_id || null,
             name: req.query.name || null,
@@ -18,7 +17,6 @@ const getStudentList = async (req, res) => {
             search: req.query.search || null,
         };
 
-        // Build the query object
         const query = {};
 
         if (filters.student_id) {
@@ -26,7 +24,7 @@ const getStudentList = async (req, res) => {
         }
 
         if (filters.name) {
-            query.name = { $regex: filters.name, $options: 'i' }; // Case-insensitive partial match
+            query.name = { $regex: filters.name, $options: 'i' }; 
         }
 
         if (filters.email) {
