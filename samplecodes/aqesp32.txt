@@ -15,7 +15,7 @@ const char *ssid = "Wokwi-GUEST";
 const char *password = "";
 
 // Vercel API endpoint URL
-const String apiUrl = "https://air-quality-back-end-v2.vercel.app/esp/updateEsp/";
+const String apiUrl = "https://air-quality-back-end-v2.vercel.app/aqReadings/updateAQReadings/";
 const String assetModel = "modelx21";
 
 void setup() {
@@ -39,20 +39,31 @@ void loop() {
   float temperature =  random(200, 300) / 10.0;
   float humidity = dht.readHumidity();
 
+  float pm2_5 =  random(20, 2000) / 10.0;
+  float co =  random(20, 2000) / 10.0;
+  float no2 =  random(20, 2000) / 10.0;
+
+  float aqi = max(pm2_5, max(co, no2));
+  aqi = round(aqi); //round off
+
   Serial.println("Reading...");
   digitalWrite(LEDPIN_BLUE, HIGH);
 
   if (isnan(humidity) || isnan(temperature)) {
     Serial.println("Failed to read from DHT sensor!");
   } else {
-    sendDataToAPI(assetModel, temperature, humidity);
+    sendDataToAPI(assetModel, aqi, pm2_5, co, no2);
     digitalWrite(LEDPIN_GREEN, HIGH);
     Serial.println("Updated Successfully...");
-    Serial.print("Temperature: ");
-    Serial.print(temperature);
-    Serial.print(" °C  Humidity (from sensor): ");
-    Serial.print(humidity);
-    Serial.println(" %");
+    Serial.print("AQI: ");
+    Serial.print(aqi);
+    Serial.print(", PM 2.5: ");
+    Serial.print(pm2_5);
+    Serial.print(", CO: ");
+    Serial.print(co);
+    Serial.print(", NO2: ");
+    Serial.print(no2);
+  
   }
 
   delay(1000);
@@ -60,7 +71,7 @@ void loop() {
   
 }
 
-void sendDataToAPI(String assetModel, float temperature, float humidity) {
+void sendDataToAPI(String assetModel, float aqi, float pm2_5, float co, float no2) {
   HTTPClient http;
 
   // Start HTTP request
@@ -71,7 +82,7 @@ void sendDataToAPI(String assetModel, float temperature, float humidity) {
   http.addHeader("Content-Type", "application/json");
 
   // Create a JSON body
-  String jsonBody = "{\"temperature\":" + String(temperature) + ",\"humidity\":" + String(humidity) + "}";
+  String jsonBody = "{\"aqi\":" + String(aqi) + ",\"pm2_5\":" + String(pm2_5) + ",\"co\":" + String(co) + ",\"no2\":" + String(no2) +"}";
 
   // Send HTTP POST request
   int httpResponseCode = http.POST(jsonBody);
