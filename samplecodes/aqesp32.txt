@@ -15,7 +15,8 @@ const char *ssid = "Wokwi-GUEST";
 const char *password = "";
 
 // Vercel API endpoint URL
-const String apiUrl = "https://air-quality-back-end-v2.vercel.app/esp/updateEsp";
+const String apiUrl = "https://air-quality-back-end-v2.vercel.app/esp/updateEsp/";
+const String assetModel = "modelx21";
 
 void setup() {
   Serial.begin(115200);
@@ -44,7 +45,7 @@ void loop() {
   if (isnan(humidity) || isnan(temperature)) {
     Serial.println("Failed to read from DHT sensor!");
   } else {
-    sendDataToAPI(temperature, humidity);
+    sendDataToAPI(assetModel, temperature, humidity);
     digitalWrite(LEDPIN_GREEN, HIGH);
     Serial.println("Updated Successfully...");
     Serial.print("Temperature: ");
@@ -59,11 +60,12 @@ void loop() {
   
 }
 
-void sendDataToAPI(float temperature, float humidity) {
+void sendDataToAPI(String assetModel, float temperature, float humidity) {
   HTTPClient http;
 
   // Start HTTP request
-  http.begin(apiUrl);
+  String fullUrl = apiUrl + assetModel;
+  http.begin(fullUrl);
 
   // Set the content type to JSON
   http.addHeader("Content-Type", "application/json");

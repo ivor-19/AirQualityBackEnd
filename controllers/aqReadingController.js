@@ -55,4 +55,22 @@ const postAQReadings = async (req, res) => {
     }
 }
 
-module.exports = {getAQReadingsList, getAQReadingsByAssetModel, postAQReadings}
+const updateAQReadings = async (req, res) => {
+    const {aqi, pm2_5, co, no2} = req.body;
+  
+    try{
+      const { asset_model } = req.params;
+      
+      const newReadings = await AirQualityReading.findOneAndUpdate({asset_model}, {aqi, pm2_5, co, no2}, {new: true});
+      if(!newReadings){
+        return res.status(404).json({message: 'No data found to update'})
+      }
+      res.status(200).json({message: 'Updated Successfully', newReadings});
+    }
+    catch(error){
+      res.status(500).json({message: 'Error updating', error});
+    }
+  
+  }
+
+module.exports = {getAQReadingsList, getAQReadingsByAssetModel, postAQReadings, updateAQReadings}
