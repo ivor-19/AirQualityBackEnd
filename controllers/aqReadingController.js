@@ -45,7 +45,7 @@ const getAQReadingsByAssetModel = async (req, res) => {
 
 const postAQReadings = async (req, res) => {
     const {aqi, pm2_5, co, no2, asset_model} = req.body;
-    const newData = new AirQualityReading({aqi, pm2_5, co, no2, asset_model});
+    const newData = new AirQualityReading({aqi, pm2_5, co, no2, asset_model, last_updated: Date.now()});
     try {
         await newData.save();
         const getList = await AirQualityReading.find();

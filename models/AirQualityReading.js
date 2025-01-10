@@ -10,7 +10,8 @@ const airQualityReadingSchema = new mongoose.Schema({
       type: String,
       enum: ['on', 'off'],  // Only 'on' or 'off' are allowed
       default: 'off',       // Set the default value as 'off'
-  }
+    },
+    last_updated: { type: Date, default: Date.now }
   });
   
 const AirQualityReading = mongoose.model('AirQualityReading', airQualityReadingSchema);
