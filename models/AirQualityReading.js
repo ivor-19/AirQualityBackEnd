@@ -6,6 +6,11 @@ const airQualityReadingSchema = new mongoose.Schema({
     co: Number,
     no2: Number,
     asset_model: String,
+    status: {
+      type: String,
+      enum: ['on', 'off'],  // Only 'on' or 'off' are allowed
+      default: 'off',       // Set the default value as 'off'
+  }
   });
   
 const AirQualityReading = mongoose.model('AirQualityReading', airQualityReadingSchema);
