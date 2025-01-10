@@ -5,8 +5,9 @@ const updateOutdatedReadings = async () => {
     try {
         const currentTime = new Date();
         const outdatedReadings = await AirQualityReading.find({
-            last_updated: { $lt: new Date(currentTime - 3 * 60 * 1000) } // 3 minutes ago
+            last_updated: { $lt: new Date(new Date() - 3 * 60 * 1000) }
         });
+        console.log(`Found ${outdatedReadings.length} outdated readings`);
 
         if (outdatedReadings.length > 0) {
             for (let reading of outdatedReadings) {
