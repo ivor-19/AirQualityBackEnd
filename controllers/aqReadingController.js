@@ -56,12 +56,12 @@ const postAQReadings = async (req, res) => {
 }
 
 const updateAQReadings = async (req, res) => {
-    const {aqi, pm2_5, co, no2} = req.body;
+    const {aqi, pm2_5, co, no2, status} = req.body;
   
     try{
       const { asset_model } = req.params;
       
-      const newReadings = await AirQualityReading.findOneAndUpdate({asset_model}, {aqi, pm2_5, co, no2}, {new: true});
+      const newReadings = await AirQualityReading.findOneAndUpdate({asset_model}, {aqi, pm2_5, co, no2, status}, {new: true});
       if(!newReadings){
         return res.status(404).json({message: 'No data found to update'})
       }
