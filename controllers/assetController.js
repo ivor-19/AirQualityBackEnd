@@ -1,4 +1,5 @@
 const Asset = require('../models/Asset');
+const AirQualityReading = require('../models/AirQualityReading');
 
 const getAssetList= async (req, res) => {
     try {
@@ -48,8 +49,13 @@ const postAssetNames = async (req, res) => {
     const newAssetName = new Asset({assetName});
     try {
         await newAssetName.save();
-        const getList = await Asset.find();
-        res.status(201).json({isSuccess: true, message: 'New asset added', getList});
+        // const getList = await Asset.find();
+
+        const newData = new AirQualityReading({aqi: 0, pm2_5: 0, co: 0, no2: 0, asset_model: assetName, last_updated: Date.now()});
+        await newData.save();
+        // const getList = await AirQualityReading.find();
+        
+        res.status(201).json({isSuccess: true, message: 'New asset added', newAssetName});
     } catch (error) {
         res.status(500).json({isSuccess: false, message: 'Error adding asset', error})
     }
