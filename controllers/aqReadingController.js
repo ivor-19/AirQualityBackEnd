@@ -1,4 +1,5 @@
 const AirQualityReading = require('../models/AirQualityReading');
+const moment = require('moment-timezone');
 
 const getAQReadingsList = async (req, res) => {
     try {
@@ -45,7 +46,7 @@ const getAQReadingsByAssetModel = async (req, res) => {
 
 const postAQReadings = async (req, res) => {
     const {aqi, pm2_5, co, no2, asset_model} = req.body;
-    const newData = new AirQualityReading({aqi, pm2_5, co, no2, asset_model, last_updated: Date.now()});
+    const newData = new AirQualityReading({aqi, pm2_5, co, no2, asset_model});
     try {
         await newData.save();
         const getList = await AirQualityReading.find();
@@ -60,12 +61,13 @@ const updateAQReadings = async (req, res) => {
   
     try{
       const { asset_model } = req.params;
+      const philippineTime = moment().tz('Asia/Manila').format('YYYY-MM-DDTHH:mm:ss.SSSZ');
       
-      const newReadings = await AirQualityReading.findOneAndUpdate({asset_model}, {aqi, pm2_5, co, no2, status, last_updated: Date.now()}, {new: true});
+      const newReadings = await AirQualityReading.findOneAndUpdate({asset_model}, {aqi, pm2_5, co, no2, status, last_updated: philippineTime}, {new: true});
       if(!newReadings){
         return res.status(404).json({message: 'No data found to update'})
       }
-      res.status(200).json({message: 'Updated Successfully', newReadings});
+      res.status(200).json({message: 'Updated Successfully', newReadings, philippineTime});
     }
     catch(error){
       res.status(500).json({message: 'Error updating', error});

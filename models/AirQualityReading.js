@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const moment = require('moment-timezone');
 
 const airQualityReadingSchema = new mongoose.Schema({
     aqi: Number,
@@ -11,7 +12,7 @@ const airQualityReadingSchema = new mongoose.Schema({
       enum: ['on', 'off'],  // Only 'on' or 'off' are allowed
       default: 'off',       // Set the default value as 'off'
     },
-    last_updated: { type: Date, default: Date.now }
+    last_updated: { type: String, default: moment().tz('Asia/Manila').format('YYYY-MM-DDTHH:mm:ss.SSSZ') }
   });
   
 const AirQualityReading = mongoose.model('AirQualityReading', airQualityReadingSchema);
