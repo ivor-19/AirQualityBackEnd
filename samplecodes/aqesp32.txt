@@ -2,24 +2,22 @@
 #include <HTTPClient.h>
 #include <DHT.h>
 
-#define LEDPIN_GREEN 32
-#define LEDPIN_BLUE 33
+#define LEDPIN_BLUE 18
+#define LEDPIN_YELLOW 19
+const int BUTTONPIN = 16;  
 
-#define DHTPIN 17
-#define DHTTYPE DHT22
+int buttonState = 0; 
+unsigned long lastButtonPress = 0;
+unsigned long debounceDelay = 300; // 300ms debounce
 
-DHT dht(DHTPIN, DHTTYPE);
-
-// Replace with your network credentials
 const char *ssid = "Wokwi-GUEST";
 const char *password = "";
 
-// Vercel API endpoint URL
 const String apiUrl = "https://air-quality-back-end-v2.vercel.app/aqReadings/updateAQReadings/";
 const String assetModel = "modelx21";
 
 void setup() {
-  Serial.begin(115200);
+  Serial.begin(115200);  
   Serial.print("Connecting to WiFi");
   WiFi.begin(ssid, password);
   while (WiFi.status() != WL_CONNECTED) {
@@ -27,34 +25,33 @@ void setup() {
     Serial.print(".");
   }
   Serial.println("Connected to WiFi");
-  dht.begin();
-  Serial.println("Hello, ESP32!");
-  pinMode(LEDPIN_GREEN, OUTPUT);
+  pinMode(BUTTONPIN, INPUT);
   pinMode(LEDPIN_BLUE, OUTPUT);
-  delay(10);
+  pinMode(LEDPIN_YELLOW, OUTPUT);
+  delay(50);
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-  float temperature =  random(200, 300) / 10.0;
-  float humidity = dht.readHumidity();
+  unsigned long currentMillis = millis();
+  buttonState = digitalRead(BUTTONPIN);
 
-  float pm2_5 =  random(20, 2000) / 10.0;
-  float co =  random(20, 2000) / 10.0;
-  float no2 =  random(20, 2000) / 10.0;
+  if (buttonState == HIGH && (currentMillis - lastButtonPress > debounceDelay)) {
+    lastButtonPress = currentMillis;
+    digitalWrite(LEDPIN_BLUE, HIGH);
+    String status = "on";
+    float temperature = random(200, 300) / 10.0;
 
-  float aqi = max(pm2_5, max(co, no2));
-  aqi = round(aqi); //round off
+    float pm2_5 = random(20, 2000) / 10.0;
+    float co = random(20, 2000) / 10.0;
+    float no2 = random(20, 2000) / 10.0;
+    float aqi = max(pm2_5, max(co, no2));
+    aqi = round(aqi);
 
-  Serial.println("Reading...");
-  digitalWrite(LEDPIN_BLUE, HIGH);
-
-  if (isnan(humidity) || isnan(temperature)) {
-    Serial.println("Failed to read from DHT sensor!");
-  } else {
-    sendDataToAPI(assetModel, aqi, pm2_5, co, no2);
-    digitalWrite(LEDPIN_GREEN, HIGH);
+    Serial.println("Reading...");
+    sendDataToAPI(assetModel, aqi, pm2_5, co, no2, status);
     Serial.println("Updated Successfully...");
+    Serial.print("STATUS: ");
+    Serial.println(status);
     Serial.print("AQI: ");
     Serial.print(aqi);
     Serial.print(", PM 2.5: ");
@@ -64,14 +61,17 @@ void loop() {
     Serial.print(", NO2: ");
     Serial.print(no2);
   
-  }
 
-  delay(1000);
-  digitalWrite(LEDPIN_GREEN, LOW);
-  
+    digitalWrite(LEDPIN_YELLOW, LOW);
+  } else {
+    Serial.println("OFF!");
+    digitalWrite(LEDPIN_BLUE, LOW);
+    digitalWrite(LEDPIN_YELLOW, LOW);
+    delay(2000);
+  }
 }
 
-void sendDataToAPI(String assetModel, float aqi, float pm2_5, float co, float no2) {
+void sendDataToAPI(String assetModel, float aqi, float pm2_5, float co, float no2, String status) {
   HTTPClient http;
 
   // Start HTTP request
@@ -82,8 +82,13 @@ void sendDataToAPI(String assetModel, float aqi, float pm2_5, float co, float no
   http.addHeader("Content-Type", "application/json");
 
   // Create a JSON body
-  String jsonBody = "{\"aqi\":" + String(aqi) + ",\"pm2_5\":" + String(pm2_5) + ",\"co\":" + String(co) + ",\"no2\":" + String(no2) +"}";
+   String jsonBody = "{\"aqi\":" + String(aqi, 2) + ",\"pm2_5\":" + String(pm2_5, 2) + 
+                    ",\"co\":" + String(co, 2) + ",\"no2\":" + String(no2, 2) + 
+                    ",\"status\":\"" + status + "\"}";
 
+
+  // Serial.print("JSON Body: ");
+  // Serial.println(jsonBody); // Debugging: print JSON body
   // Send HTTP POST request
   int httpResponseCode = http.POST(jsonBody);
 
