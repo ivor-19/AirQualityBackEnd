@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const moment = require('moment-timezone');
+const { DateTime } = require('luxon'); 
 
 const airQualityReadingSchema = new mongoose.Schema({
   aqi: Number,
@@ -14,10 +14,11 @@ const airQualityReadingSchema = new mongoose.Schema({
   },
   last_updated: { 
     type: Date, 
-    default: () => moment().tz('Asia/Manila').toDate()  // Use moment to get a Date object
+    default: () => DateTime.now().setZone('Asia/Manila').toJSDate() // Use Luxon to get current date in Manila timezone
   }
 });
 
-  
+// Define the model
 const AirQualityReading = mongoose.model('AirQualityReading', airQualityReadingSchema);
+
 module.exports = AirQualityReading;
