@@ -51,9 +51,9 @@ const postAssetNames = async (req, res) => {
     try {
         await newAssetName.save();
         // const getList = await Asset.find();
-        const philippineTime = moment().tz('Asia/Manila').format('YYYY-MM-DDTHH:mm:ss.SSSZ');
+        // const philippineTime = moment().tz('Asia/Manila').format('YYYY-MM-DDTHH:mm:ss.SSSZ');
 
-        const newData = new AirQualityReading({aqi: 0, pm2_5: 0, co: 0, no2: 0, asset_model: assetName, last_updated: philippineTime});
+        const newData = new AirQualityReading({aqi: 0, pm2_5: 0, co: 0, no2: 0, asset_model: assetName, last_updated: Date.now()});
         await newData.save();
         // const getList = await AirQualityReading.find();
         

@@ -61,13 +61,13 @@ const updateAQReadings = async (req, res) => {
   
     try{
       const { asset_model } = req.params;
-      const philippineTime = moment().tz('Asia/Manila').format('YYYY-MM-DDTHH:mm:ss.SSSZ');
+        
       
-      const newReadings = await AirQualityReading.findOneAndUpdate({asset_model}, {aqi, pm2_5, co, no2, status, last_updated: philippineTime}, {new: true});
+      const newReadings = await AirQualityReading.findOneAndUpdate({asset_model}, {aqi, pm2_5, co, no2, status, last_updated: Date.now()}, {new: true});
       if(!newReadings){
         return res.status(404).json({message: 'No data found to update'})
       }
-      res.status(200).json({message: 'Updated Successfully', newReadings, philippineTime});
+      res.status(200).json({message: 'Updated Successfully', newReadings});
     }
     catch(error){
       res.status(500).json({message: 'Error updating', error});
