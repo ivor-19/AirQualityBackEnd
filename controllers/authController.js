@@ -4,13 +4,13 @@ const { validateUserExists, hashPasswordIfNeeded, checkDuplicateEmailOrUsername 
 
 const signup = async (req, res) => {
     try {
-        const { username, email, password, asset_model, first_access } = req.body;
+        const { username, email, password, role, asset_model, first_access } = req.body;
 
         await validateUserExists(username, email);
 
-        const newUser = new User({ username, email, password, asset_model, first_access});
+        const newUser = new User({ username, email, password, role, asset_model, first_access });
         await newUser.save();
-        return res.status(201).json({isSuccess: true, message: 'Account created successfully!'});
+        return res.status(201).json({isSuccess: true, message: 'Account created successfully wow!', newUser});
     } catch (error) {
         if (error.message === 'Username is already taken.' || error.message === 'Email is already taken.') {
             return res.status(400).json({ message: error.message });
@@ -43,6 +43,7 @@ const login = async (req, res) => {
                 _id: user._id,
                 username: user.username,
                 email: user.email,
+                role: user.role,  // Include the role in the response
                 asset_model: user.asset_model,
                 first_access: user.first_access
                 // Do not send password to frontend for security reasons
@@ -64,34 +65,39 @@ const getUsers = async (req, res) => {
             username: req.query.username || null,
             email: req.query.email || null,
             asset_model: req.query.asset_model || null,
+            role: req.query.role || null,  // Filter by role
             search: req.query.search || null,
         }
         const query = {};
 
-        if(filters.username){
-            query.username = { $regex: filters.username, $options: 'i'}
+        if (filters.username) {
+            query.username = { $regex: filters.username, $options: 'i' };
         }
 
-        if(filters.email){
-            query.email = { $regex: filters.email, $options: 'i'}
+        if (filters.email) {
+            query.email = { $regex: filters.email, $options: 'i' };
         }
 
-        if(filters.asset_model){
-            query.asset_model = { $regex: filters.asset_model, $options: 'i'}
+        if (filters.asset_model) {
+            query.asset_model = { $regex: filters.asset_model, $options: 'i' };
         }
 
-        if(filters.search){
+        if (filters.role) {  // Add role filter
+            query.role = filters.role;
+        }
+
+        if (filters.search) {
             query.$or = [
-                { username: {$regex: filters.search, $options: 'i'} },
-                { email: { $regex: filters.search, $options: 'i'} },
-                { asset_model: { $regex: filters.search, $options: 'i'} },
+                { username: { $regex: filters.search, $options: 'i' } },
+                { email: { $regex: filters.search, $options: 'i' } },
+                { asset_model: { $regex: filters.search, $options: 'i' } },
             ]
         }
 
         const users = await User.find(query)
-                                 .skip(skip)   
-                                 .limit(limit)  
-                                 .exec();      
+            .skip(skip)   
+            .limit(limit)  
+            .exec();      
 
         const totalUsers = await User.countDocuments(query);
         const lastPage = Math.ceil(totalUsers / limit);
@@ -100,21 +106,21 @@ const getUsers = async (req, res) => {
             isSuccess: true,
             users,
             pagination: {
-                total: totalUsers,            // Total number of users
-                per_page: limit,              // Number of users per page
-                current_page: page,           // Current page number
-                last_page: lastPage           // Last page number
+                total: totalUsers,            
+                per_page: limit,              
+                current_page: page,           
+                last_page: lastPage           
             }
         });
     } catch (error) {
-        res.status(500).json({ isSuccess: false, message: 'Error fetching data', error})
+        res.status(500).json({ isSuccess: false, message: 'Error fetching data', error })
     }
-}
+};
 
 const editUser = async (req, res) => {
     try {
         const { id } = req.params;
-        const { username, email, password, asset_model, first_access } = req.body;
+        const { username, email, password, role, asset_model, first_access } = req.body;
 
         // Find the user by ID
         const user = await User.findById(id);
@@ -130,6 +136,7 @@ const editUser = async (req, res) => {
         // Update the user's details
         user.username = username || user.username;
         user.email = email || user.email;
+        user.role = role || user.role;  // Update role if provided
         user.asset_model = asset_model || user.asset_model;
         user.first_access = first_access || user.first_access;
 
