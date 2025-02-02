@@ -11,7 +11,7 @@ const getChat = async (req, res) => {
 }
 
 const postChat = async (req, res) => {
-    const {message, sender} = req.body;
+    const {message, sender, role} = req.body;
     const newChat = new Chat({message, sender, role, date: Date.now()});
 
     try {
