@@ -2,13 +2,11 @@ const ExpoTokenNotification = require('../models/ExpoTokenNotification');
 
 const getToken = async (req, res) => {
     try{
-      const getList = await ExpoTokenNotification.find({}).select('token_notif');
+      const tokens = await ExpoTokenNotification.find({}).select('token_notif');
       res.status(200).json({
           isSuccess: true,
-          message: 'Emails retrieved successfully',
-          tokens:{
-            getList
-          }
+          message: 'Notification Tokens retrieved successfully',
+          tokens,
       })
   
     } catch (error) {
