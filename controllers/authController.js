@@ -4,11 +4,11 @@ const { validateUserExists, hashPasswordIfNeeded, checkDuplicateEmailOrUsername 
 
 const signup = async (req, res) => {
     try {
-        const { username, email, password, role, asset_model, first_access } = req.body;
+        const { username, email, password, role, asset_model, first_access, token_notif } = req.body;
 
         await validateUserExists(username, email);
 
-        const newUser = new User({ username, email, password, role, asset_model, first_access });
+        const newUser = new User({ username, email, password, role, asset_model, first_access, token_notif });
         await newUser.save();
         return res.status(201).json({isSuccess: true, message: 'Account created successfully wow!', newUser});
     } catch (error) {
@@ -45,7 +45,8 @@ const login = async (req, res) => {
                 email: user.email,
                 role: user.role,  // Include the role in the response
                 asset_model: user.asset_model,
-                first_access: user.first_access
+                first_access: user.first_access,
+                token_notif: user.token_notif
                 // Do not send password to frontend for security reasons
             }
         });
@@ -120,7 +121,7 @@ const getUsers = async (req, res) => {
 const editUser = async (req, res) => {
     try {
         const { id } = req.params;
-        const { username, email, password, role, asset_model, first_access } = req.body;
+        const { username, email, password, role, asset_model, first_access, token_notif } = req.body;
 
         // Find the user by ID
         const user = await User.findById(id);
@@ -139,6 +140,7 @@ const editUser = async (req, res) => {
         user.role = role || user.role;  // Update role if provided
         user.asset_model = asset_model || user.asset_model;
         user.first_access = first_access || user.first_access;
+        user.token_notif = token_notif || user.token_notif;
 
         // Save the updated user
         await user.save();

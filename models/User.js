@@ -7,7 +7,8 @@ const userSchema = new mongoose.Schema({
     password: {type: String, unique: true,},
     role: {type: String, required: true, default: 'Student'},
     asset_model: {type: String},
-    first_access: {type: String}
+    first_access: {type: String},
+    token_notif: {type: String},
   });
   
 userSchema.pre('save', async function(next) {
