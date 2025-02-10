@@ -2,7 +2,7 @@ const ExpoTokenNotification = require('../models/ExpoTokenNotification');
 
 const getToken = async (req, res) => {
     try{
-      const tokens = await ExpoTokenNotification.find({}).select('token_notif');
+      const tokens = await ExpoTokenNotification.find();
       res.status(200).json({
           isSuccess: true,
           message: 'Notification Tokens retrieved successfully',
