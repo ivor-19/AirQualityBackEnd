@@ -12,7 +12,7 @@ const getToken = async (req, res) => {
 
 const postToken = async (req, res) => {
     const {token_notif} = req.body;
-    const newToken = new Chat({token_notif});
+    const newToken = new ExpoTokenNotification({token_notif});
 
     try {
         await newToken.save();
