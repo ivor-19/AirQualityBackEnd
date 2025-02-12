@@ -8,6 +8,7 @@ const userSchema = new mongoose.Schema({
     role: {type: String, required: true, default: 'Student'},
     asset_model: {type: String},
     first_access: {type: String},
+    device_notif: {type: String}
   });
   
 userSchema.pre('save', async function(next) {
