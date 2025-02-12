@@ -129,23 +129,41 @@ const editUser = async (req, res) => {
             return res.status(404).json({ isSuccess: false, message: 'User not found' });
         }
 
-        // If password is being updated, hash it
-        await hashPasswordIfNeeded(user, password)
+        // If username or email is being updated, check for duplicates
+        if (username || email) {
+            await checkDuplicateEmailOrUsername(username, email, user);
+        }
 
-        await checkDuplicateEmailOrUsername(username, email, user)
+        // Update user fields if provided
+        if (username) user.username = username;
+        if (email) user.email = email;
+        if (role) user.role = role;
+        if (asset_model) user.asset_model = asset_model;
+        if (first_access !== undefined) user.first_access = first_access;
+        if (device_notif !== undefined) user.device_notif = device_notif;
 
-        // Update the user's details
-        user.username = username || user.username;
-        user.email = email || user.email;
-        user.role = role || user.role;  // Update role if provided
-        user.asset_model = asset_model || user.asset_model;
-        user.first_access = first_access || user.first_access;
-        user.device_notif = device_notif || user.device_notif;
+        // Handle password update specifically
+        if (password) {
+            // The password will be automatically hashed by the pre-save middleware
+            user.password = password;
+        }
 
         // Save the updated user
         await user.save();
 
-        return res.status(200).json({ isSuccess: true, message: 'User updated successfully', user });
+        return res.status(200).json({ 
+            isSuccess: true, 
+            message: 'User updated successfully',
+            user: {
+                _id: user._id,
+                username: user.username,
+                email: user.email,
+                role: user.role,
+                asset_model: user.asset_model,
+                first_access: user.first_access,
+                device_notif: user.device_notif
+            }
+        });
     } catch (error) {
         console.error('Error editing user:', error);
         res.status(500).json({ isSuccess: false, message: 'Server Error: Error editing user', error });
