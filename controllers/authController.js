@@ -1,18 +1,18 @@
 const User = require('../models/User');
 const { generateToken } = require('../services/authServices');
-const { validateUserExists, hashPasswordIfNeeded, checkDuplicateEmailOrUsername } = require('../middlewares/validationMiddleware');
+const { validateUserExists, hashPasswordIfNeeded, checkDuplicateStudentId } = require('../middlewares/validationMiddleware');
 
 const signup = async (req, res) => {
     try {
         const { student_id, username, email, password, role, status, asset_model, first_access, device_notif } = req.body;
 
-        await validateUserExists(username, email);
+        await validateUserExists(student_id);
 
         const newUser = new User({ student_id, username, email, password, role, status, asset_model, first_access, device_notif });
         await newUser.save();
         return res.status(201).json({isSuccess: true, message: 'Account created successfully wow!', newUser});
     } catch (error) {
-        if (error.message === 'Username is already taken.' || error.message === 'Email is already taken.') {
+        if (error.message === 'Student ID already existed.') {
             return res.status(400).json({ message: error.message });
         }
         res.status(500).json({ isSuccess: false, message: 'Server Error: Error creating account', error})
@@ -132,8 +132,8 @@ const editUser = async (req, res) => {
         }
 
         // If username or email is being updated, check for duplicates
-        if (username || email) {
-            await checkDuplicateEmailOrUsername(username, email, user);
+        if (student_id) {
+            await checkDuplicateStudentId(student_id, user);
         }
 
         // Update user fields if provided

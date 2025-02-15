@@ -1,28 +1,19 @@
 const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 
-const validateUserExists = async (username, email) => {
-    const userExists = await User.findOne({ username });
-    if (userExists) {
-        throw new Error('Username is already taken.');
-    }
-
-    const emailExists = await User.findOne({ email });
-    if (emailExists) {
-        throw new Error('Email is already taken.');
+const validateUserExists = async (student_id) => {
+    const studentExists = await User.findOne({ student_id });
+    if (studentExists) {
+        throw new Error('Student ID already existed.');
     }
 };
 
-const checkDuplicateEmailOrUsername = async (username, email, user) => {
-    const usernameExists = username && username !== user.username ? await User.findOne({ username }) : null;
-    if (usernameExists) {
-        throw new Error('Username is already taken');
+const checkDuplicateStudentId = async (student_id, user) => {
+    const studentIdExists = student_id && student_id !== user.student_id ? await User.findOne({ student_id }) : null;
+    if (studentIdExists) {
+        throw new Error('Student ID already existed.');
     }
 
-    const emailExists = email && email !== user.email ? await User.findOne({ email }) : null;
-    if (emailExists) {
-        throw new Error('Email is already taken');
-    }
 };
 
 const hashPasswordIfNeeded = async (user, password) => {
@@ -32,4 +23,4 @@ const hashPasswordIfNeeded = async (user, password) => {
     }
 };
 
-module.exports = { validateUserExists, checkDuplicateEmailOrUsername, hashPasswordIfNeeded };
+module.exports = { validateUserExists, checkDuplicateStudentId, hashPasswordIfNeeded };
