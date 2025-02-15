@@ -1,18 +1,18 @@
 const User = require('../models/User');
 const { generateToken } = require('../services/authServices');
-const { validateUserExists, hashPasswordIfNeeded, checkDuplicateEmailOrUsername } = require('../middlewares/validationMiddleware');
+const { validateUserExists, hashPasswordIfNeeded, checkDuplicateUser } = require('../middlewares/validationMiddleware');
 
 const signup = async (req, res) => {
     try {
-        const { username, email, password, role, asset_model, first_access, device_notif } = req.body;
+        const { account_id, username, email, password, role, asset_model, first_access, device_notif } = req.body;
 
-        await validateUserExists(username, email);
+        await validateUserExists(account_id);
 
-        const newUser = new User({ username, email, password, role, asset_model, first_access, device_notif });
+        const newUser = new User({ account_id, username, email, password, role, asset_model, first_access, device_notif });
         await newUser.save();
         return res.status(201).json({isSuccess: true, message: 'Account created successfully!', newUser});
     } catch (error) {
-        if (error.message === 'Username is already taken.' || error.message === 'Email is already taken.') {
+        if (error.message === 'User already exists.') {
             return res.status(400).json({ message: error.message });
         }
         res.status(500).json({ isSuccess: false, message: 'Server Error: Error creating account', error})
@@ -21,16 +21,16 @@ const signup = async (req, res) => {
 
 const login = async (req, res) => {
     try {
-        const { email, password } = req.body;
+        const { account_id, password } = req.body;
   
-        const user = await User.findOne({ email });
+        const user = await User.findOne({ account_id });
         if (!user) {
-            return res.status(400).json({ isSuccess: false, message: 'Email does not exists' });
+            return res.status(400).json({ isSuccess: false, message: 'Student does not exists' });
         }
   
         const isMatch = await user.comparePassword(password);
         if (!isMatch) {
-            return res.status(400).json({ isSuccess: false, message: 'Invalid email or password' });
+            return res.status(400).json({ isSuccess: false, message: 'Invalid id or password' });
         }
     
         const token = generateToken(user);
@@ -41,6 +41,7 @@ const login = async (req, res) => {
             token,
             user: {
                 _id: user._id,
+                account_id: user.account_id,
                 username: user.username,
                 email: user.email,
                 role: user.role,  // Include the role in the response
@@ -121,7 +122,7 @@ const getUsers = async (req, res) => {
 const editUser = async (req, res) => {
     try {
         const { id } = req.params;
-        const { username, email, password, role, asset_model, first_access, device_notif } = req.body;
+        const { account_id, username, email, password, role, asset_model, first_access, device_notif } = req.body;
 
         // Find the user by ID
         const user = await User.findById(id);
@@ -130,11 +131,12 @@ const editUser = async (req, res) => {
         }
 
         // If username or email is being updated, check for duplicates
-        if (username || email) {
-            await checkDuplicateEmailOrUsername(username, email, user);
+        if (account_id) {
+            await checkDuplicateUser(account_id, user);
         }
 
         // Update user fields if provided
+        if (account_id) user.account_id = account_id;
         if (username) user.username = username;
         if (email) user.email = email;
         if (role) user.role = role;
@@ -156,6 +158,7 @@ const editUser = async (req, res) => {
             message: 'User updated successfully',
             user: {
                 _id: user._id,
+                account_id: user.account_id,
                 username: user.username,
                 email: user.email,
                 role: user.role,
