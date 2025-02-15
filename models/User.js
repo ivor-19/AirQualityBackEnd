@@ -7,7 +7,7 @@ const userSchema = new mongoose.Schema({
     password: {type: String, unique: true,},
     role: {type: String, required: true, default: 'Student'},
     asset_model: {type: String, default: ""},
-    first_access: {type: String, default: ""},
+    first_access: {type: String, default: "Yes"},
     device_notif: {type: String, default: ""}
   });
   
