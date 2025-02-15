@@ -4,11 +4,11 @@ const { validateUserExists, hashPasswordIfNeeded, checkDuplicateEmailOrUsername 
 
 const signup = async (req, res) => {
     try {
-        const { username, email, password, role, asset_model, first_access, device_notif } = req.body;
+        const { student_id, username, email, password, role, status, asset_model, first_access, device_notif } = req.body;
 
         await validateUserExists(username, email);
 
-        const newUser = new User({ username, email, password, role, asset_model, first_access, device_notif });
+        const newUser = new User({ student_id, username, email, password, role, status, asset_model, first_access, device_notif });
         await newUser.save();
         return res.status(201).json({isSuccess: true, message: 'Account created successfully wow!', newUser});
     } catch (error) {
@@ -21,16 +21,16 @@ const signup = async (req, res) => {
 
 const login = async (req, res) => {
     try {
-        const { email, password } = req.body;
+        const { student_id, password } = req.body;
   
-        const user = await User.findOne({ email });
+        const user = await User.findOne({ student_id });
         if (!user) {
-            return res.status(400).json({ isSuccess: false, message: 'Email does not exists' });
+            return res.status(400).json({ isSuccess: false, message: 'Student does not exists' });
         }
   
         const isMatch = await user.comparePassword(password);
         if (!isMatch) {
-            return res.status(400).json({ isSuccess: false, message: 'Invalid email or password' });
+            return res.status(400).json({ isSuccess: false, message: 'Invalid id or password' });
         }
     
         const token = generateToken(user);
@@ -42,8 +42,10 @@ const login = async (req, res) => {
             user: {
                 _id: user._id,
                 username: user.username,
+                student_id: user.student_id,
                 email: user.email,
                 role: user.role,  // Include the role in the response
+                status: user.status,
                 asset_model: user.asset_model,
                 first_access: user.first_access,
                 device_notif: user.device_notif,
@@ -121,7 +123,7 @@ const getUsers = async (req, res) => {
 const editUser = async (req, res) => {
     try {
         const { id } = req.params;
-        const { username, email, password, role, asset_model, first_access, device_notif } = req.body;
+        const { student_id, username, email, password, role, status, asset_model, first_access, device_notif } = req.body;
 
         // Find the user by ID
         const user = await User.findById(id);
@@ -135,9 +137,11 @@ const editUser = async (req, res) => {
         }
 
         // Update user fields if provided
+        if (student_id) user.student_id = student_id;
         if (username) user.username = username;
         if (email) user.email = email;
         if (role) user.role = role;
+        if (status) user.status = status;
         if (asset_model) user.asset_model = asset_model;
         if (first_access !== undefined) user.first_access = first_access;
         if (device_notif !== undefined) user.device_notif = device_notif;
@@ -156,9 +160,11 @@ const editUser = async (req, res) => {
             message: 'User updated successfully',
             user: {
                 _id: user._id,
+                student_id: user.student_id,
                 username: user.username,
                 email: user.email,
                 role: user.role,
+                status: user.status,
                 asset_model: user.asset_model,
                 first_access: user.first_access,
                 device_notif: user.device_notif
