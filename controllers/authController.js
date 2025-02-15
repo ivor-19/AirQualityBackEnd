@@ -41,8 +41,8 @@ const login = async (req, res) => {
             token,
             user: {
                 _id: user._id,
-                username: user.username,
                 student_id: user.student_id,
+                username: user.username,
                 email: user.email,
                 role: user.role,  // Include the role in the response
                 status: user.status,
