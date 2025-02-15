@@ -1,16 +1,16 @@
 const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 
-const validateUserExists = async (user_id) => {
-    const userExists = await User.findOne({ user_id });
-    if (userExists) {
+const validateUserExists = async (account_id) => {
+    const accountExists = await User.findOne({ account_id });
+    if (accountExists) {
         throw new Error('User already exists.');
     }
 };
 
-const checkDuplicateUser = async (user_id, user) => {
-    const userExists = user_id && user_id !== user.user_id ? await User.findOne({ user_id }) : null;
-    if (userExists) {
+const checkDuplicateUser = async (account_id, user) => {
+    const accountExists = account_id && account_id !== user.account_id ? await User.findOne({ account_id }) : null;
+    if (accountExists) {
         throw new Error('User already exists.');
     }
 
