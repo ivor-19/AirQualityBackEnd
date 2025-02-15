@@ -10,7 +10,7 @@ const signup = async (req, res) => {
 
         const newUser = new User({ username, email, password, role, asset_model, first_access, device_notif });
         await newUser.save();
-        return res.status(201).json({isSuccess: true, message: 'Account created successfully wow!', newUser});
+        return res.status(201).json({isSuccess: true, message: 'Account created successfully!', newUser});
     } catch (error) {
         if (error.message === 'Username is already taken.' || error.message === 'Email is already taken.') {
             return res.status(400).json({ message: error.message });
