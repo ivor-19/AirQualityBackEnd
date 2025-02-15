@@ -4,7 +4,8 @@ const chatSchema = new mongoose.Schema({
     message: { type: String, required: true },
     sender: { type: String, required: true },
     role: { type: String, required: true },
-    date: { type: Date, default: Date.now },
+    time: { type: String },
+    date: { type: String },
   });
   
 const Chat = mongoose.model('Chat', chatSchema);
