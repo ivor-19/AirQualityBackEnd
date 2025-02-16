@@ -1,18 +1,18 @@
 const User = require('../models/User');
 const { generateToken } = require('../services/authServices');
-const { validateUserExists, hashPasswordIfNeeded, checkDuplicateUser } = require('../middlewares/validationMiddleware');
+const { validateUserExists, hashPasswordIfNeeded, checkDuplicateEmailOrUsername } = require('../middlewares/validationMiddleware');
 
 const signup = async (req, res) => {
     try {
-        const { account_id, username, email, password, role, status, asset_model, first_access, device_notif } = req.body;
+        const { username, email, password, role, asset_model, first_access } = req.body;
 
-        await validateUserExists(account_id);
+        await validateUserExists(username, email);
 
-        const newUser = new User({ account_id, username, email, password, role, status, asset_model, first_access, device_notif });
+        const newUser = new User({ username, email, password, role, asset_model, first_access });
         await newUser.save();
-        return res.status(201).json({isSuccess: true, message: 'Account created successfully!', newUser});
+        return res.status(201).json({isSuccess: true, message: 'Account created successfully wow!', newUser});
     } catch (error) {
-        if (error.message === 'User already exists.') {
+        if (error.message === 'Username is already taken.' || error.message === 'Email is already taken.') {
             return res.status(400).json({ message: error.message });
         }
         res.status(500).json({ isSuccess: false, message: 'Server Error: Error creating account', error})
@@ -21,16 +21,16 @@ const signup = async (req, res) => {
 
 const login = async (req, res) => {
     try {
-        const { account_id, password } = req.body;
+        const { email, password } = req.body;
   
-        const user = await User.findOne({ account_id });
+        const user = await User.findOne({ email });
         if (!user) {
-            return res.status(400).json({ isSuccess: false, message: 'Student does not exists' });
+            return res.status(400).json({ isSuccess: false, message: 'Email does not exists' });
         }
   
         const isMatch = await user.comparePassword(password);
         if (!isMatch) {
-            return res.status(400).json({ isSuccess: false, message: 'Invalid id or password' });
+            return res.status(400).json({ isSuccess: false, message: 'Invalid email or password' });
         }
     
         const token = generateToken(user);
@@ -41,14 +41,11 @@ const login = async (req, res) => {
             token,
             user: {
                 _id: user._id,
-                account_id: user.account_id,
                 username: user.username,
                 email: user.email,
                 role: user.role,  // Include the role in the response
-                status: user.status,
                 asset_model: user.asset_model,
-                first_access: user.first_access,
-                device_notif: user.device_notif,
+                first_access: user.first_access
                 // Do not send password to frontend for security reasons
             }
         });
@@ -60,6 +57,10 @@ const login = async (req, res) => {
 
 const getUsers = async (req, res) => {
     try {
+        const page = parseInt(req.query.page) || 1;  
+        const limit = parseInt(req.query.limit) || 10; 
+        const skip = (page - 1) * limit;
+
         const filters = {
             username: req.query.username || null,
             email: req.query.email || null,
@@ -93,22 +94,33 @@ const getUsers = async (req, res) => {
             ]
         }
 
-        const users = await User.find(query).exec();  // Removed pagination logic
+        const users = await User.find(query)
+            .skip(skip)   
+            .limit(limit)  
+            .exec();      
+
+        const totalUsers = await User.countDocuments(query);
+        const lastPage = Math.ceil(totalUsers / limit);
 
         res.json({
             isSuccess: true,
             users,
+            pagination: {
+                total: totalUsers,            
+                per_page: limit,              
+                current_page: page,           
+                last_page: lastPage           
+            }
         });
     } catch (error) {
         res.status(500).json({ isSuccess: false, message: 'Error fetching data', error })
     }
 };
 
-
 const editUser = async (req, res) => {
     try {
         const { id } = req.params;
-        const { account_id, username, email, password, role, status, asset_model, first_access, device_notif } = req.body;
+        const { username, email, password, role, asset_model, first_access } = req.body;
 
         // Find the user by ID
         const user = await User.findById(id);
@@ -116,45 +128,22 @@ const editUser = async (req, res) => {
             return res.status(404).json({ isSuccess: false, message: 'User not found' });
         }
 
-        // If username or email is being updated, check for duplicates
-        if (account_id) {
-            await checkDuplicateUser(account_id, user);
-        }
+        // If password is being updated, hash it
+        await hashPasswordIfNeeded(user, password)
 
-        // Update user fields if provided
-        if (account_id) user.account_id = account_id;
-        if (username) user.username = username;
-        if (email) user.email = email;
-        if (role) user.role = role;
-        if (status) user.status = status;
-        if (asset_model) user.asset_model = asset_model;
-        if (first_access !== undefined) user.first_access = first_access;
-        if (device_notif !== undefined) user.device_notif = device_notif;
+        await checkDuplicateEmailOrUsername(username, email, user)
 
-        // Handle password update specifically
-        if (password) {
-            // The password will be automatically hashed by the pre-save middleware
-            user.password = password;
-        }
+        // Update the user's details
+        user.username = username || user.username;
+        user.email = email || user.email;
+        user.role = role || user.role;  // Update role if provided
+        user.asset_model = asset_model || user.asset_model;
+        user.first_access = first_access || user.first_access;
 
         // Save the updated user
         await user.save();
 
-        return res.status(200).json({ 
-            isSuccess: true, 
-            message: 'User updated successfully',
-            user: {
-                _id: user._id,
-                account_id: user.account_id,
-                username: user.username,
-                email: user.email,
-                role: user.role,
-                status: user.status,
-                asset_model: user.asset_model,
-                first_access: user.first_access,
-                device_notif: user.device_notif
-            }
-        });
+        return res.status(200).json({ isSuccess: true, message: 'User updated successfully', user });
     } catch (error) {
         console.error('Error editing user:', error);
         res.status(500).json({ isSuccess: false, message: 'Server Error: Error editing user', error });
@@ -174,17 +163,4 @@ const deleteUser = async (req, res) => {
     }
 }
 
-const getSpecificUser = async (req, res) => {
-    const { id } = req.params;  
-    try {
-        const user = await User.findById(id); 
-        if (!user) {
-            return res.status(400).json({ isSuccess: false, message: "User not found" });
-        }
-        res.status(200).json({ isSuccess: true, message: 'User found', user });
-    } catch (error) {
-        res.status(500).json({ isSuccess: false, message: 'Error finding user', error });
-    }
-}
-
-module.exports = {signup, login, getUsers, editUser, deleteUser, getSpecificUser};
+module.exports = {signup, login, getUsers, editUser, deleteUser};
