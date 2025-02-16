@@ -60,10 +60,6 @@ const login = async (req, res) => {
 
 const getUsers = async (req, res) => {
     try {
-        const page = parseInt(req.query.page) || 1;  
-        const limit = parseInt(req.query.limit) || 10; 
-        const skip = (page - 1) * limit;
-
         const filters = {
             username: req.query.username || null,
             email: req.query.email || null,
@@ -97,28 +93,17 @@ const getUsers = async (req, res) => {
             ]
         }
 
-        const users = await User.find(query)
-            .skip(skip)   
-            .limit(limit)  
-            .exec();      
-
-        const totalUsers = await User.countDocuments(query);
-        const lastPage = Math.ceil(totalUsers / limit);
+        const users = await User.find(query).exec();  // Removed pagination logic
 
         res.json({
             isSuccess: true,
             users,
-            pagination: {
-                total: totalUsers,            
-                per_page: limit,              
-                current_page: page,           
-                last_page: lastPage           
-            }
         });
     } catch (error) {
         res.status(500).json({ isSuccess: false, message: 'Error fetching data', error })
     }
 };
+
 
 const editUser = async (req, res) => {
     try {

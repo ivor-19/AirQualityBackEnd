@@ -6,6 +6,8 @@ const app = express();
 const mongoose = require('mongoose');
 const jwt = require('jsonwebtoken');
 const fileUpload = require('express-fileupload')
+
+//Routes
 const studentRoutes = require('./routes/studentRoutes');
 const historyRoutes = require('./routes/historyRoutes');
 const latestaqRoutes = require('./routes/latestaqRoutes');
