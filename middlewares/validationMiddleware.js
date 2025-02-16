@@ -1,25 +1,17 @@
 const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 
-const validateUserExists = async (username, email) => {
-    const userExists = await User.findOne({ username });
-    if (userExists) {
-        throw new Error('Username is already taken.');
-    }
+const validateUserExists = async (account_id) => {
 
-    const emailExists = await User.findOne({ email });
+    const emailExists = await User.findOne({ account_id });
     if (emailExists) {
         throw new Error('Email is already taken.');
     }
 };
 
-const checkDuplicateEmailOrUsername = async (username, email, user) => {
-    const usernameExists = username && username !== user.username ? await User.findOne({ username }) : null;
-    if (usernameExists) {
-        throw new Error('Username is already taken');
-    }
+const checkDuplicateEmailOrUsername = async (account_id, user) => {
 
-    const emailExists = email && email !== user.email ? await User.findOne({ email }) : null;
+    const emailExists = account_id && account_id !== user.account_id ? await User.findOne({ account_id }) : null;
     if (emailExists) {
         throw new Error('Email is already taken');
     }

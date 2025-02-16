@@ -4,11 +4,11 @@ const { validateUserExists, hashPasswordIfNeeded, checkDuplicateEmailOrUsername 
 
 const signup = async (req, res) => {
     try {
-        const { username, email, password, role, asset_model, first_access } = req.body;
+        const { username, account_id, email, password, role, asset_model, first_access } = req.body;
 
-        await validateUserExists(username, email);
+        await validateUserExists(account_id);
 
-        const newUser = new User({ username, email, password, role, asset_model, first_access });
+        const newUser = new User({ username, account_id, email, password, role, asset_model, first_access });
         await newUser.save();
         return res.status(201).json({isSuccess: true, message: 'Account created successfully wow!', newUser});
     } catch (error) {
@@ -21,9 +21,9 @@ const signup = async (req, res) => {
 
 const login = async (req, res) => {
     try {
-        const { email, password } = req.body;
+        const { account_id, password } = req.body;
   
-        const user = await User.findOne({ email });
+        const user = await User.findOne({ account_id });
         if (!user) {
             return res.status(400).json({ isSuccess: false, message: 'Email does not exists' });
         }
@@ -42,6 +42,7 @@ const login = async (req, res) => {
             user: {
                 _id: user._id,
                 username: user.username,
+                account_id: user.account_id,
                 email: user.email,
                 role: user.role,  // Include the role in the response
                 asset_model: user.asset_model,
@@ -120,7 +121,7 @@ const getUsers = async (req, res) => {
 const editUser = async (req, res) => {
     try {
         const { id } = req.params;
-        const { username, email, password, role, asset_model, first_access } = req.body;
+        const { username, account_id, email, password, role, asset_model, first_access } = req.body;
 
         // Find the user by ID
         const user = await User.findById(id);
@@ -131,10 +132,11 @@ const editUser = async (req, res) => {
         // If password is being updated, hash it
         await hashPasswordIfNeeded(user, password)
 
-        await checkDuplicateEmailOrUsername(username, email, user)
+        await checkDuplicateEmailOrUsername(account_id, user)
 
         // Update the user's details
         user.username = username || user.username;
+        user.account_id = account_id || user.account_id;
         user.email = email || user.email;
         user.role = role || user.role;  // Update role if provided
         user.asset_model = asset_model || user.asset_model;
