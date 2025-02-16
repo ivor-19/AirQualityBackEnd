@@ -2,14 +2,16 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
 const userSchema = new mongoose.Schema({
-    username: {type: String, unique: true, required: true,},
     account_id: {type: String, unique: true, required: true},
-    email: {type: String, default: " "},
-    password: {type: String},
+    username: {type: String, unique: true, required: true},
+    email: {type: String, default: " "}, // Remove unique and default since it's no longer primary
+    password: {type: String}, // Remove unique constraint for password
     role: {type: String, required: true, default: 'Student'},
+    status: {type: String, default: 'Active'},
     asset_model: {type: String, default: " "},
-    first_access: {type: String, default: "Yes"}
-  });
+    first_access: {type: String, default: "Yes"},
+    device_notif: {type: String, default: " "}
+});
   
 userSchema.pre('save', async function(next) {
     if(this.isModified('password')){
