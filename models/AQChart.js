@@ -7,10 +7,8 @@ const aqChartSchema = new mongoose.Schema({
   co: Number,
   no2: Number,
   asset_model: String,
-  last_updated: { 
-    type: Date, 
-    default: () => DateTime.now().setZone('Asia/Manila').toJSDate() // Use Luxon to get current date in Manila timezone
-  }
+  time: String,
+  date: String
 });
 
 // Define the model
