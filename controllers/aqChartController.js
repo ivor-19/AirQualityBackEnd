@@ -32,8 +32,10 @@ const getAQChartByAssetModel = async (req, res) => {
 const postAQChart = async (req, res) => {
     const {aqi, pm2_5, co, no2, asset_model} = req.body;
     // const philippineTimeFull = moment().tz('Asia/Manila').format('YYYY-MM-DDTHH:mm:ss.SSSZ');
-    const philippineTime = moment().tz('Asia/Manila').format('hh:mm A');
-    const newData = new AQChart({aqi, pm2_5, co, no2, asset_model, time: philippineTime, date: philippineTime.split('T')[0]});
+    const philippineTime = moment().tz('Asia/Manila');
+    const time = philippineTime.format('hh:mm A');
+    const date = philippineTime.format('YYYY-MM-DD');
+    const newData = new AQChart({aqi, pm2_5, co, no2, asset_model, time: time, date: date});
     try {
         await newData.save();
         const getList = await AQChart.find();
