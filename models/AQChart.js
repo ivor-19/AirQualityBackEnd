@@ -7,7 +7,6 @@ const aqChartSchema = new mongoose.Schema({
   co: Number,
   no2: Number,
   asset_model: String,
-  time: String,
   date: String
 });
 
