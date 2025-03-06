@@ -1,5 +1,8 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
+const moment = require('moment-timezone');
+
+const philippineTimeFull = moment().tz('Asia/Manila').format('YYYY-MM-DDTHH:mm:ss.SSSZ');
 
 const userSchema = new mongoose.Schema({
     account_id: {type: String, unique: true, required: true},
@@ -10,7 +13,9 @@ const userSchema = new mongoose.Schema({
     status: {type: String, default: 'Ready'},
     asset_model: {type: String, default: " "},
     first_access: {type: String, default: "Yes"},
-    device_notif: {type: String, default: " "}
+    device_notif: {type: String, default: " "},
+    created_at: {type: String, default: philippineTimeFull},
+    updated_at: {type: String, default: philippineTimeFull}
 });
   
 userSchema.pre('save', async function(next) {

@@ -1,6 +1,7 @@
 const User = require('../models/User');
 const { generateToken } = require('../services/authServices');
 const { validateUserExists, hashPasswordIfNeeded, checkDuplicateUser } = require('../middlewares/validationMiddleware');
+const moment = require('moment-timezone');
 
 const signup = async (req, res) => {
     try {
@@ -107,6 +108,7 @@ const getUsers = async (req, res) => {
 
 const editUser = async (req, res) => {
     try {
+        const philippineTimeFull = moment().tz('Asia/Manila').format('YYYY-MM-DDTHH:mm:ss.SSSZ');
         const { id } = req.params;
         const { account_id, username, email, password, role, status, asset_model, first_access, device_notif } = req.body;
 
@@ -130,6 +132,9 @@ const editUser = async (req, res) => {
         if (asset_model) user.asset_model = asset_model;
         if (first_access !== undefined) user.first_access = first_access;
         if (device_notif !== undefined) user.device_notif = device_notif;
+        
+        // Always update the updated_at timestamp
+        user.updated_at = philippineTimeFull;
 
         // Handle password update specifically
         if (password) {
@@ -152,7 +157,8 @@ const editUser = async (req, res) => {
                 status: user.status,
                 asset_model: user.asset_model,
                 first_access: user.first_access,
-                device_notif: user.device_notif
+                device_notif: user.device_notif,
+                updated_at: user.updated_at
             }
         });
     } catch (error) {
