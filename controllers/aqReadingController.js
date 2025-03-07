@@ -33,12 +33,16 @@ const getAQReadingsList = async (req, res) => {
 const getAQReadingsByAssetModel = async (req, res) => {
     try {
         const { asset_model } = req.params;
-        const getList = await AirQualityReading.find({ asset_model });
+        const aqReadings = await AirQualityReading.find({ asset_model });
 
-        if (getList.length === 0) {
+        if (aqReadings.length === 0) {
             return res.status(404).json({ isSuccess: false, message: `No data found for asset_model: ${asset_model}` });
         }
-        res.json(getList);
+        res.json({
+            isSuccess: true,
+            message: "Fetched AQ readings successfully",
+            aqReadings
+        });
     } catch (error) {
         res.status(500).json({ isSuccess: false, message: 'Error fetching data for the asset_model', error });
     }
