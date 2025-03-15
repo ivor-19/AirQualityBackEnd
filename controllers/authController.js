@@ -59,8 +59,12 @@ const login = async (req, res) => {
     }
   };
 
-const getUsers = async (req, res) => {
+  const getUsers = async (req, res) => {
     try {
+        const page = parseInt(req.query.page) || 1;  // Default to page 1 if not provided
+        const limit = parseInt(req.query.limit) || 10;  // Default to 10 items per page if not provided
+        const skip = (page - 1) * limit;  // Calculate the number of records to skip
+
         const filters = {
             username: req.query.username || null,
             email: req.query.email || null,
@@ -68,8 +72,10 @@ const getUsers = async (req, res) => {
             role: req.query.role || null,  // Filter by role
             search: req.query.search || null,
         }
-        const query = {};
 
+        const query = {};  // Initialize the query object
+
+        // Filter conditions for username, email, asset_model, and role
         if (filters.username) {
             query.username = { $regex: filters.username, $options: 'i' };
         }
@@ -82,10 +88,11 @@ const getUsers = async (req, res) => {
             query.asset_model = { $regex: filters.asset_model, $options: 'i' };
         }
 
-        if (filters.role) {  // Add role filter
+        if (filters.role) {  // Filter by role
             query.role = filters.role;
         }
 
+        // If a search term is provided, search in multiple fields (username, email, asset_model)
         if (filters.search) {
             query.$or = [
                 { username: { $regex: filters.search, $options: 'i' } },
@@ -94,26 +101,31 @@ const getUsers = async (req, res) => {
             ]
         }
 
+        // Fetch the users with pagination (skip, limit) and the constructed query
         const users = await User.find(query)
-        .skip(skip)   
-        .limit(limit)  
-        .exec();      
+            .skip(skip)   // Skip the appropriate number of records based on page
+            .limit(limit)  // Limit the number of records fetched
+            .exec();
 
+        // Get the total number of users matching the query (for pagination metadata)
         const totalUsers = await User.countDocuments(query);
+        
+        // Calculate the last page number
         const lastPage = Math.ceil(totalUsers / limit);
 
+        // Return the response with users and pagination metadata
         res.json({
             isSuccess: true,
             users,
             pagination: {
-                total: totalUsers,            
-                per_page: limit,              
-                current_page: page,           
-                last_page: lastPage           
+                total: totalUsers,            // Total number of users found
+                per_page: limit,              // Number of users per page
+                current_page: page,           // Current page number
+                last_page: lastPage,          // Last page number
             }
         });
     } catch (error) {
-        res.status(500).json({ isSuccess: false, message: 'Error fetching data', error })
+        res.status(500).json({ isSuccess: false, message: 'Error fetching data', error });
     }
 };
 
