@@ -59,11 +59,14 @@ const login = async (req, res) => {
     }
   };
 
-  const getUsers = async (req, res) => {
+const getUsers = async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;  // Default to page 1 if not provided
-        const limit = parseInt(req.query.limit) || 10;  // Default to 10 items per page if not provided
-        const skip = (page - 1) * limit;  // Calculate the number of records to skip
+        
+        // Default to `null` (or `Infinity`) for limit if not provided
+        const limit = req.query.limit ? parseInt(req.query.limit) : null; 
+
+        const skip = (page - 1) * (limit || 0);  // If there's no limit, skip 0 (no limit on number of results)
 
         const filters = {
             username: req.query.username || null,
@@ -102,16 +105,21 @@ const login = async (req, res) => {
         }
 
         // Fetch the users with pagination (skip, limit) and the constructed query
-        const users = await User.find(query)
-            .skip(skip)   // Skip the appropriate number of records based on page
-            .limit(limit)  // Limit the number of records fetched
-            .exec();
+        const usersQuery = User.find(query)
+            .skip(skip); // Skip the appropriate number of records based on page
+
+        // Apply the limit if it's defined
+        if (limit) {
+            usersQuery.limit(limit); // Apply limit only if it's not null/undefined
+        }
+
+        const users = await usersQuery.exec();
 
         // Get the total number of users matching the query (for pagination metadata)
         const totalUsers = await User.countDocuments(query);
         
         // Calculate the last page number
-        const lastPage = Math.ceil(totalUsers / limit);
+        const lastPage = limit ? Math.ceil(totalUsers / limit) : 1;  // If no limit, last page is 1
 
         // Return the response with users and pagination metadata
         res.json({
@@ -119,7 +127,7 @@ const login = async (req, res) => {
             users,
             pagination: {
                 total: totalUsers,            // Total number of users found
-                per_page: limit,              // Number of users per page
+                per_page: limit || totalUsers, // Number of users per page (if limit is not defined, show total count)
                 current_page: page,           // Current page number
                 last_page: lastPage,          // Last page number
             }
@@ -128,6 +136,7 @@ const login = async (req, res) => {
         res.status(500).json({ isSuccess: false, message: 'Error fetching data', error });
     }
 };
+
 
 
 const editUser = async (req, res) => {
