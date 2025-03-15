@@ -94,11 +94,23 @@ const getUsers = async (req, res) => {
             ]
         }
 
-        const users = await User.find(query).exec();  // Removed pagination logic
+        const users = await User.find(query)
+        .skip(skip)   
+        .limit(limit)  
+        .exec();      
+
+        const totalUsers = await User.countDocuments(query);
+        const lastPage = Math.ceil(totalUsers / limit);
 
         res.json({
             isSuccess: true,
             users,
+            pagination: {
+                total: totalUsers,            
+                per_page: limit,              
+                current_page: page,           
+                last_page: lastPage           
+            }
         });
     } catch (error) {
         res.status(500).json({ isSuccess: false, message: 'Error fetching data', error })
