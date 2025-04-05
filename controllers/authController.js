@@ -240,7 +240,8 @@ const getSpecificUser = async (req, res) => {
 
 const getEmails = async (req, res) => {
     try {
-        const emails = await User.find({}).select('email');
+        const users = await User.find({}).select('email');
+        const emails = users.map(user => user.email);
         res.status(200).json({
             isSuccess: true,
             message: 'Emails retrieved successfully',
