@@ -238,4 +238,17 @@ const getSpecificUser = async (req, res) => {
     }
 }
 
-module.exports = {signup, login, getUsers, editUser, deleteUser, getSpecificUser};
+const getEmails = async (req, res) => {
+    try {
+        const emails = await Student.find({}).select('email');
+        res.status(200).json({
+            isSuccess: true,
+            message: 'Emails retrieved successfully',
+            emails
+        })
+    } catch (error) {
+        res.status(500).json({isSuccess: false, message: 'Error fetching emails', error})
+    }
+}
+
+module.exports = {signup, login, getUsers, editUser, deleteUser, getSpecificUser, getEmails};
