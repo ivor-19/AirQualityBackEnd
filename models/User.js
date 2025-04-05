@@ -9,7 +9,7 @@ const userSchema = new mongoose.Schema({
     username: {type: String, required: true},
     email: {type: String, default: " "}, // Remove unique and default since it's no longer primary
     password: {type: String}, // Remove unique constraint for password
-    role: {type: String, required: true, default: 'Student'},
+    role: {type: String, required: true},
     status: {type: String, default: 'Ready'},
     asset_model: {type: String, default: " "},
     first_access: {type: String, default: "Yes"},
