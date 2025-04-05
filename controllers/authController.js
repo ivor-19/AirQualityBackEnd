@@ -59,97 +59,97 @@ const login = async (req, res) => {
     }
   };
 
-// const getUsers = async (req, res) => {
-//     try {
-//         const page = parseInt(req.query.page) || 1;  // Default to page 1 if not provided
-        
-//         // Default to `null` (or `Infinity`) for limit if not provided
-//         const limit = req.query.limit ? parseInt(req.query.limit) : null; 
-
-//         const skip = (page - 1) * (limit || 0);  // If there's no limit, skip 0 (no limit on number of results)
-
-//         const filters = {
-//             username: req.query.username || null,
-//             email: req.query.email || null,
-//             asset_model: req.query.asset_model || null,
-//             role: req.query.role || null,  // Filter by role
-//             search: req.query.search || null,
-//         }
-
-//         const query = {};  // Initialize the query object
-
-//         // Filter conditions for username, email, asset_model, and role
-//         if (filters.username) {
-//             query.username = { $regex: filters.username, $options: 'i' };
-//         }
-
-//         if (filters.email) {
-//             query.email = { $regex: filters.email, $options: 'i' };
-//         }
-
-//         if (filters.asset_model) {
-//             query.asset_model = { $regex: filters.asset_model, $options: 'i' };
-//         }
-
-//         if (filters.role) {  // Filter by role
-//             query.role = filters.role;
-//         }
-
-//         // If a search term is provided, search in multiple fields (username, email, asset_model)
-//         if (filters.search) {
-//             query.$or = [
-//                 { username: { $regex: filters.search, $options: 'i' } },
-//                 { email: { $regex: filters.search, $options: 'i' } },
-//                 { asset_model: { $regex: filters.search, $options: 'i' } },
-//             ]
-//         }
-
-//         // Fetch the users with pagination (skip, limit) and the constructed query
-//         const usersQuery = User.find(query)
-//             .skip(skip); // Skip the appropriate number of records based on page
-
-//         // Apply the limit if it's defined
-//         if (limit) {
-//             usersQuery.limit(limit); // Apply limit only if it's not null/undefined
-//         }
-
-//         const users = await usersQuery.exec();
-
-//         // Get the total number of users matching the query (for pagination metadata)
-//         const totalUsers = await User.countDocuments(query);
-        
-//         // Calculate the last page number
-//         const lastPage = limit ? Math.ceil(totalUsers / limit) : 1;  // If no limit, last page is 1
-
-//         // Return the response with users and pagination metadata
-//         res.json({
-//             isSuccess: true,
-//             users,
-//             pagination: {
-//                 total: totalUsers,            // Total number of users found
-//                 per_page: limit || totalUsers, // Number of users per page (if limit is not defined, show total count)
-//                 current_page: page,           // Current page number
-//                 last_page: lastPage,          // Last page number
-//             }
-//         });
-//     } catch (error) {
-//         res.status(500).json({ isSuccess: false, message: 'Error fetching data', error });
-//     }
-// };
-
 const getUsers = async (req, res) => {
-    try{
-        const users = await User.find();  // Fetch all AQChart readings
+    try {
+        const page = parseInt(req.query.page) || 1;  // Default to page 1 if not provided
+        
+        // Default to `null` (or `Infinity`) for limit if not provided
+        const limit = req.query.limit ? parseInt(req.query.limit) : null; 
+
+        const skip = (page - 1) * (limit || 0);  // If there's no limit, skip 0 (no limit on number of results)
+
+        const filters = {
+            username: req.query.username || null,
+            email: req.query.email || null,
+            asset_model: req.query.asset_model || null,
+            role: req.query.role || null,  // Filter by role
+            search: req.query.search || null,
+        }
+
+        const query = {};  // Initialize the query object
+
+        // Filter conditions for username, email, asset_model, and role
+        if (filters.username) {
+            query.username = { $regex: filters.username, $options: 'i' };
+        }
+
+        if (filters.email) {
+            query.email = { $regex: filters.email, $options: 'i' };
+        }
+
+        if (filters.asset_model) {
+            query.asset_model = { $regex: filters.asset_model, $options: 'i' };
+        }
+
+        if (filters.role) {  // Filter by role
+            query.role = filters.role;
+        }
+
+        // If a search term is provided, search in multiple fields (username, email, asset_model)
+        if (filters.search) {
+            query.$or = [
+                { username: { $regex: filters.search, $options: 'i' } },
+                { email: { $regex: filters.search, $options: 'i' } },
+                { asset_model: { $regex: filters.search, $options: 'i' } },
+            ]
+        }
+
+        // Fetch the users with pagination (skip, limit) and the constructed query
+        const usersQuery = User.find(query)
+            .skip(skip); // Skip the appropriate number of records based on page
+
+        // Apply the limit if it's defined
+        if (limit) {
+            usersQuery.limit(limit); // Apply limit only if it's not null/undefined
+        }
+
+        const users = await usersQuery.exec();
+
+        // Get the total number of users matching the query (for pagination metadata)
+        const totalUsers = await User.countDocuments(query);
+        
+        // Calculate the last page number
+        const lastPage = limit ? Math.ceil(totalUsers / limit) : 1;  // If no limit, last page is 1
+
+        // Return the response with users and pagination metadata
         res.json({
             isSuccess: true,
-            message: "Fetch Users successfully",
-            users
-        });  
-    }
-    catch(err){
+            users,
+            pagination: {
+                total: totalUsers,            // Total number of users found
+                per_page: limit || totalUsers, // Number of users per page (if limit is not defined, show total count)
+                current_page: page,           // Current page number
+                last_page: lastPage,          // Last page number
+            }
+        });
+    } catch (error) {
         res.status(500).json({ isSuccess: false, message: 'Error fetching data', error });
     }
-}
+};
+
+// const getUsers = async (req, res) => {
+//     try{
+//         const users = await User.find();  // Fetch all AQChart readings
+//         res.json({
+//             isSuccess: true,
+//             message: "Fetch Users successfully",
+//             users
+//         });  
+//     }
+//     catch(err){
+//         res.status(500).json({ isSuccess: false, message: 'Error fetching data', error });
+//     }
+// }
 
 const editUser = async (req, res) => {
     try {
