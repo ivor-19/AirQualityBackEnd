@@ -251,4 +251,20 @@ const getEmails = async (req, res) => {
     }
 }
 
-module.exports = {signup, login, getUsers, editUser, deleteUser, getSpecificUser, getEmails};
+const getAdminNotif = async (req, res) => {
+    try {
+        const users = await User.find({}).select('role device_notif');
+
+        const adminNotifs = users.filter(user => user.role === 'Admin').map(user => user.device_notif);
+
+        res.status(200).json({
+            isSuccess: true,
+            message: 'Admin device notifs retrieved successfully',
+            adminNotifs
+        });
+    } catch (error) {
+        res.status(500).json({ isSuccess: false, message: 'Error fetching admin notifs', error });
+    }
+};
+
+module.exports = {signup, login, getUsers, editUser, deleteUser, getSpecificUser, getEmails, getAdminNotif};
