@@ -254,7 +254,9 @@ const getEmails = async (req, res) => {
 const getAdminNotif = async (req, res) => {
     try {
         const users = await User.find({ role: 'Admin' }).select('device_notif');
-        const adminNotifs = users.map(user => user.device_notif).filter(notif => notif);
+        const adminNotifs = users
+            .map(user => user.device_notif?.trim())  // Trim whitespace
+            .filter(notif => notif && notif !== " "); // Exclude empty or single-space strings
 
         if (adminNotifs.length === 0) {
             return res.status(404).json({
