@@ -254,9 +254,12 @@ const getEmails = async (req, res) => {
 const getAdminNotif = async (req, res) => {
     try {
         const users = await User.find({ role: 'Admin' }).select('device_notif');
+
+        // Filter out empty, whitespace, or invalid tokens, and remove duplicates
         const adminNotifs = users
             .map(user => user.device_notif?.trim())  // Trim whitespace
-            .filter(notif => notif && notif !== " "); // Exclude empty or single-space strings
+            .filter(notif => notif && notif !== " ") // Exclude empty or single-space strings
+            .filter((notif, index, self) => self.indexOf(notif) === index); // Remove duplicates
 
         if (adminNotifs.length === 0) {
             return res.status(404).json({
