@@ -7,7 +7,7 @@ const philippineTimeFull = moment().tz('Asia/Manila').format('YYYY-MM-DDTHH:mm:s
 const userSchema = new mongoose.Schema({
     account_id: {type: String, unique: true, required: true},
     username: {type: String, required: true},
-    email: {type: String, default: ""}, // Remove unique and default since it's no longer primary
+    email: {type: String}, // Remove unique and default since it's no longer primary
     password: {type: String}, // Remove unique constraint for password
     role: {type: String, required: true},
     status: {type: String, default: 'Ready'},
