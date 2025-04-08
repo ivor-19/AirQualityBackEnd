@@ -4,10 +4,8 @@
   const transporter = nodemailer.createTransport({
     service: 'gmail', // You can change this if you are using a different service
     auth: {
-      // user: process.env.EMAIL_USER, // Use environment variables for sensitive data
-      // pass: process.env.EMAIL_PASSWORD,
-      user: "airguard.alert@gmail.com",
-      password: "dolh jgfn ntkr ijyg",
+      user: process.env.EMAIL_USER, // Use environment variables for sensitive data
+      pass: process.env.EMAIL_PASSWORD,
     },
   });
 
