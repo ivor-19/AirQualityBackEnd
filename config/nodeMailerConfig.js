@@ -1,13 +1,12 @@
 const nodemailer = require('nodemailer');
 
-// Create a transporter object using Gmail service (You can replace it with other services like Mailtrap or SMTP)
 const transporter = nodemailer.createTransport({
-  service: 'gmail', // You can change this if you are using a different service
+  service: 'gmail',
   auth: {
-    // user: process.env.EMAIL_USER, // Use environment variables for sensitive data
-    // pass: process.env.EMAIL_PASSWORD,
-    user: "airguard.alert@gmail.com", // Use environment variables for sensitive data
-    pass: "dolhjgfnntkrijyg",
+    user: process.env.EMAIL_USER, // Use environment variables for sensitive data
+    pass: process.env.EMAIL_PASSWORD,
+    // user: "airguard.alert@gmail.com", // Use environment variables for sensitive data
+    // pass: "dolhjgfnntkrijyg",
   },
 });
 
