@@ -15,7 +15,7 @@ const sendEmail = async (req, res) => {
 
   // Setup email options
   const mailOptions = {
-    from: "airguard.alert@gmail.com", // Sender email
+    from: process.env.EMAIL_USER_AG, // Sender email
     to,
     subject,
     text: message, // Plain text message
@@ -26,7 +26,7 @@ const sendEmail = async (req, res) => {
     const info = await transporter.sendMail(mailOptions);
     return res.status(200).json({
       success: true,
-      message: `Email sent c: ${info.response}`,
+      message: `Email sentttt: ${info.response}`,
     });
   } catch (error) {
     return res.status(500).json({
