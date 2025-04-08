@@ -13,7 +13,7 @@ const sendEmail = async (req, res) => {
 
   // Setup email options
   const mailOptions = {
-    from: process.env.EMAIL_USER, // Sender email
+    from: process.env.EMAIL_USER_AG, // Sender email
     to,
     subject,
     text: message, 
