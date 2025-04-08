@@ -15,10 +15,16 @@ const sendEmail = async (req, res) => {
 
   // Setup email options
   const mailOptions = {
-    from: "airguard.alert@gmail.com", // Sender email
+    from: '"AirGuard Alert" <airguard.alert@gmail.com>', // Add a sender name
     to,
     subject,
-    text: message, // Plain text message
+    text: message,
+    html: `<div style="font-family: Arial, sans-serif; line-height: 1.6;">${message}</div>`, // HTML version helps
+    headers: {
+      'X-Priority': '1', // High priority (1 = highest)
+      'X-Mailer': 'NodeMailer (AirGuard)',
+      'List-Unsubscribe': '<mailto:airguard.alert+unsubscribe@gmail.com>', // Helps with spam filters
+    }
   };
 
   // Send email using Nodemailer
