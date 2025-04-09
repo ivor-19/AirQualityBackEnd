@@ -2,32 +2,32 @@ const History = require('../models/History');
 
 const getHistoryData = async (req, res) => {
     try {
-        const page = parseInt(req.query.page) || 1;  
-        const limit = parseInt(req.query.limit) || 10; 
+        const page = parseInt(req.query.page) || 1;
+        const limit = req.query.limit ? parseInt(req.query.limit) : null;  // If no limit, fetch all records
 
-        const skip = (page - 1) * limit;
+        const skip = (page - 1) * (limit || 0); // No limit, fetch all records
         const history = await History.find()
-                                 .skip(skip)   
-                                 .limit(limit)  
-                                 .exec();      
+                                     .skip(skip)
+                                     .limit(limit || 0)  // No limit condition
+                                     .exec();
 
         const totalHistory = await History.countDocuments();
-        const lastPage = Math.ceil(totalHistory / limit);
+        const lastPage = limit ? Math.ceil(totalHistory / limit) : 1; // If limit is undefined, just return the first page
 
         res.json({
             isSuccess: true,
             history,
             pagination: {
-                total: totalHistory,            // Total number of users
-                per_page: limit,              // Number of users per page
-                current_page: page,           // Current page number
-                last_page: lastPage           // Last page number
+                total: totalHistory,  // Total number of records
+                current_page: page,   // Current page number
+                last_page: lastPage   // Last page number
             }
         });
     } catch (error) {
-        res.status(500).json({ isSuccess: false, message: 'Error fetching data', error})
+        res.status(500).json({ isSuccess: false, message: 'Error fetching data', error });
     }
 }
+
 
 
 const postHistoryData = async (req, res) => {
