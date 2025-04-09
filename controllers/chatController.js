@@ -1,4 +1,4 @@
-const Chat = require('../models/Chat');
+const Chat = require('../models');
 
 const getChat = async (req, res) => {
     try{

@@ -1,4 +1,4 @@
-const AirQualityReading = require('../models/AirQualityReading');
+const AirQualityReading = require('../models');
 const moment = require('moment-timezone');
 
 const getAQReadingsList = async (req, res) => {

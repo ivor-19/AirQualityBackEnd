@@ -1,4 +1,4 @@
-const ProtoEsp = require('../models/ProtoEsp');
+const ProtoEsp = require('../models');
 
 
 const getList = async(req, res) => {

@@ -1,4 +1,4 @@
-const ExpoTokenNotification = require('../models/ExpoTokenNotification');
+const ExpoTokenNotification = require('../models');
 
 const getToken = async (req, res) => {
     try{
