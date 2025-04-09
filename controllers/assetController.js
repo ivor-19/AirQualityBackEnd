@@ -1,5 +1,5 @@
-const Asset = require('../models');
-const AirQualityReading = require('../models');
+const Asset = require('../models/models');
+const AirQualityReading = require('../models/models');
 const moment = require('moment-timezone')
 
 const getAssetList= async (req, res) => {
