@@ -52,17 +52,20 @@ const uploadExcel = async (req, res) => {
       const savedUsers = [];
       for (let row of data) {
           const { account_id, username, email } = row;
-
-          if (!account_id || !username || !email ) {
-              continue; // Skip if required data is missing
-          }
-
-          const newUser = new User({account_id, username, email,});
+          if (!account_id || !username || !email) continue;
+      
           try {
+              const existingUser = await User.findOne({ account_id });
+              if (existingUser) {
+                  console.log(`User with account_id ${account_id} already exists.`);
+                  continue;
+              }
+      
+              const newUser = new User({ account_id, username, email });
               await newUser.save();
               savedUsers.push(newUser);
           } catch (error) {
-              console.error('Error creating users:', error);
+              console.error(`Error saving user ${account_id}:`, error.message);
           }
       }
       res.status(200).json({
