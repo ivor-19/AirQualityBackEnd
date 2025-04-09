@@ -28,20 +28,20 @@ const uploadExcel = async (req, res) => {
     const data = xlsx.utils.sheet_to_json(worksheet);
     console.log('Parsed data:', JSON.stringify(data, null, 2));
 
-    const savedUsers = [], duplicateUsers = [], invalidUsers = [], blankEmailUsers = [];
+    const savedUsers = [], duplicateUsers = [], invalidUsers = [];
     for (let row of data) {
       const account_id = row.account_id || row['account_id'];
       const username = row.username || row['username'];
-      const email = row.email || row['email'] || '';
+      const email = row.email || row['email'] || ''; // Allow empty email
       
       if (!account_id || !username) { invalidUsers.push(row); continue; }
-      if (!email) { blankEmailUsers.push(row); continue; } // Skip blank emails
 
       try {
         const existingUser = await User.findOne({ account_id });
         if (existingUser) { duplicateUsers.push(row); continue; }
         const newUser = new User({
-          account_id, username, email,
+          account_id, username,
+          email: email || ' ', // Store empty string as single space if empty
           password: "@Student01", role: "Student", status: "Ready",
           asset_model: " ", first_access: "Yes", device_notif: " "
         });
@@ -55,8 +55,7 @@ const uploadExcel = async (req, res) => {
       isSuccess: true,
       message: `${savedUsers.length} users added successfully`,
       savedUsers, duplicates: duplicateUsers.length,
-      invalidEntries: invalidUsers.length, blankEmails: blankEmailUsers.length,
-      totalProcessed: data.length
+      invalidEntries: invalidUsers.length, totalProcessed: data.length
     });
 
   } catch (error) {
