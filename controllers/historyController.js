@@ -5,28 +5,31 @@ const getHistoryData = async (req, res) => {
         const page = parseInt(req.query.page) || 1;
         const limit = req.query.limit ? parseInt(req.query.limit) : null;  // If no limit, fetch all records
 
-        const skip = (page - 1) * (limit || 0); // No limit, fetch all records
+        const skip = (page - 1) * (limit || 0);  // If no limit, skip 0 (no limit)
         const history = await History.find()
                                      .skip(skip)
-                                     .limit(limit || 0)  // No limit condition
+                                     .limit(limit || 0)  // If no limit, fetch all records
                                      .exec();
 
         const totalHistory = await History.countDocuments();
-        const lastPage = limit ? Math.ceil(totalHistory / limit) : 1; // If limit is undefined, just return the first page
+        const lastPage = limit ? Math.ceil(totalHistory / limit) : 1;  // If no limit, treat it as 1 page
 
+        // Return the response with history and pagination metadata
         res.json({
             isSuccess: true,
             history,
             pagination: {
-                total: totalHistory,  // Total number of records
-                current_page: page,   // Current page number
-                last_page: lastPage   // Last page number
+                total: totalHistory,            // Total number of records found
+                per_page: limit || totalHistory, // Number of records per page (if limit is not defined, show total count)
+                current_page: page,             // Current page number
+                last_page: lastPage,            // Last page number
             }
         });
     } catch (error) {
         res.status(500).json({ isSuccess: false, message: 'Error fetching data', error });
     }
 }
+
 
 
 
