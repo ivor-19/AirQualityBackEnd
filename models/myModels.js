@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const { DateTime } = require('luxon'); 
+const { DateTime } = require('luxon');
 
 const airQualityReadingSchema = new mongoose.Schema({
   aqi: Number,
@@ -63,21 +63,21 @@ const latestaqSchema = new mongoose.Schema({
 });
 
 const studentSchema = new mongoose.Schema({
-  student_id: {type: String, unique: true, required: true,},
-  name: {type: String, unique: true, required: true,},
-  email: {type: String, unique: true, required: true,},
+  student_id: {type: String, unique: true, required: true},
+  name: {type: String, unique: true, required: true},
+  email: {type: String, unique: true, required: true},
   phone_number: {type: String},
 });
-  
 
-const Student = mongoose.model('Student', studentSchema);
-const LatestAQ = mongoose.model('LatestAQ', latestaqSchema);
-const History = mongoose.model('History', historySchema);
-const ExpoTokenNotification = mongoose.model('ExpoTokenNotification', expoTokenNotificationSchema);
-const Chat = mongoose.model('Chat', chatSchema);
-const AirQualityReading = mongoose.model('AirQualityReading', airQualityReadingSchema);
-const AQChart = mongoose.model('AQChart', aqChartSchema);
-const Asset = mongoose.model('Asset', assetSchema);
+// Ensure that the models are only defined once
+const Student = mongoose.models.Student || mongoose.model('Student', studentSchema);
+const LatestAQ = mongoose.models.LatestAQ || mongoose.model('LatestAQ', latestaqSchema);
+const History = mongoose.models.History || mongoose.model('History', historySchema);
+const ExpoTokenNotification = mongoose.models.ExpoTokenNotification || mongoose.model('ExpoTokenNotification', expoTokenNotificationSchema);
+const Chat = mongoose.models.Chat || mongoose.model('Chat', chatSchema);
+const AirQualityReading = mongoose.models.AirQualityReading || mongoose.model('AirQualityReading', airQualityReadingSchema);
+const AQChart = mongoose.models.AQChart || mongoose.model('AQChart', aqChartSchema);
+const Asset = mongoose.models.Asset || mongoose.model('Asset', assetSchema);
 
 module.exports = {
   Student,
