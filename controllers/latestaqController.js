@@ -1,4 +1,4 @@
-const LatestAQ = require('../models/myModels');
+const {LatestAQ} = require('../models/myModels');
 
 const getLatestAQ = async (req, res) => {
     try {
