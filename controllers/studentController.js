@@ -1,4 +1,4 @@
-const Student = require('../models/models');
+const Student = require('../models/myModels');
 const fs = require('fs');
 const path = require('path');
 const xlsx = require('xlsx');

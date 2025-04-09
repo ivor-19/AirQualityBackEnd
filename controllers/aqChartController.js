@@ -1,4 +1,4 @@
-const { AQChart } = require('../models/models')
+const { AQChart } = require('../models/myModels')
 const moment = require('moment-timezone');
 
 const getAQChartList = async (req, res) => {
