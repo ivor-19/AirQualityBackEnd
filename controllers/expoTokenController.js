@@ -38,5 +38,24 @@ const postToken = async (req, res) => {
     }
 };
 
+const sendNotification = async (req, res) => {
+    try {
+        const { to, title, body, sound } = req.body;
+        
+        await axios.post('https://exp.host/--/api/v2/push/send', {
+            to,
+            title,
+            body,
+            sound
+        });
 
-module.exports = {getToken, postToken};
+        res.status(200).json({
+            isSuccess: true,
+            message: 'Notification send successfully',
+        })
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to send push notification' });
+    }
+}
+
+module.exports = {getToken, postToken, sendNotification};
