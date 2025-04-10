@@ -251,37 +251,36 @@ const getEmails = async (req, res) => {
     }
 }
 
-const getAdminNotif = async (req, res) => {
+const getAllAndAdminDeviceNotifs = async (req, res) => {
     try {
-        const users = await User.find({ role: 'Admin' }).select('device_notif');
+        const allUsers = await User.find().select('device_notif role');
 
-        // Filter out empty, whitespace, or invalid tokens, and remove duplicates
-        const adminNotifs = users
-            .map(user => user.device_notif?.trim())  // Trim whitespace
-            .filter(notif => notif && notif !== " ") // Exclude empty or single-space strings
-            .filter((notif, index, self) => self.indexOf(notif) === index); // Remove duplicates
+        const allNotifs = allUsers
+            .map(user => user.device_notif?.trim())
+            .filter(notif => notif && notif !== " ")
+            .filter((notif, index, self) => self.indexOf(notif) === index);
 
-        if (adminNotifs.length === 0) {
-            return res.status(404).json({
-                isSuccess: false,
-                message: 'No admin notifications found'
-            });
-        }
+        const adminNotifs = allUsers
+            .filter(user => user.role === 'Admin')
+            .map(user => user.device_notif?.trim())
+            .filter(notif => notif && notif !== " ")
+            .filter((notif, index, self) => self.indexOf(notif) === index);
 
         res.status(200).json({
             isSuccess: true,
-            message: 'Admin device notifs retrieved successfully',
-            adminNotifs
+            message: 'All device notifications and admin device notifications retrieved',
+            allDeviceNotifs: allNotifs,
+            adminDeviceNotifs: adminNotifs
         });
     } catch (error) {
-        console.error('Error in getAdminNotif:', error);
-        res.status(500).json({ 
-            isSuccess: false, 
-            message: 'Error fetching admin notifs', 
-            error: error.message 
+        console.error('Error in getAllAndAdminDeviceNotifs:', error);
+        res.status(500).json({
+            isSuccess: false,
+            message: 'Error fetching notifications',
+            error: error.message
         });
     }
 };
 
 
-module.exports = {signup, login, getUsers, editUser, deleteUser, getSpecificUser, getEmails, getAdminNotif};
+module.exports = {signup, login, getUsers, editUser, deleteUser, getSpecificUser, getEmails, getAllAndAdminDeviceNotifs};
