@@ -35,7 +35,7 @@ const postAQChart = async (req, res) => {
     // const philippineTime = moment().tz('Asia/Manila');
     // const time = philippineTime.format('hh:mm A');
     // const date = philippineTime.format('YYYY-MM-DD');
-    const newData = new AQChart({aqi, pm2_5, co, no2, asset_model, date: philippineTimeFull});
+    const newData = new AQChart({aqi, pm2_5, pm10, co, no2, asset_model, date: philippineTimeFull});
     try {
         await newData.save();
         const getList = await AQChart.find();

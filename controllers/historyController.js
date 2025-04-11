@@ -34,8 +34,8 @@ const getHistoryData = async (req, res) => {
 
 
 const postHistoryData = async (req, res) => {
-    const {date, timestamp, aqi, pm2_5, co, no2, scanned_by, scanned_using_model, message} = req.body;
-    const newData = new History({date, timestamp, aqi, pm2_5, co, no2, scanned_by, scanned_using_model, message});
+    const {date, timestamp, aqi, pm2_5, pm10, co, no2, scanned_by, scanned_using_model, message} = req.body;
+    const newData = new History({date, timestamp, aqi, pm2_5, pm10, co, no2, scanned_by, scanned_using_model, message});
 
     try {
         await newData.save();

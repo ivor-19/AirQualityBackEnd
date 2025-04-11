@@ -4,6 +4,7 @@ const { DateTime } = require('luxon');
 const airQualityReadingSchema = new mongoose.Schema({
   aqi: Number,
   pm2_5: Number,
+  pm10: Number,
   co: Number,
   no2: Number,
   asset_model: String,
