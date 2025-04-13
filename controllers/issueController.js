@@ -16,14 +16,14 @@ const getIssueList = async (req, res) => {
 };
 
 const postIssue = async (req, res) => {
-    const {sender_id, sender_accountId, sender_name, title, content, status, reply} = req.body;
+    const {sender_id, sender_accountId, sender_name, title, description} = req.body;
     // const philippineTimeFull = moment().tz('Asia/Manila').format('YYYY-MM-DDTHH:mm:ss.SSSZ');
     const philippineTime = moment().tz('Asia/Manila');
     const time = philippineTime.format('hh:mm A');
     const date = philippineTime.format('YYYY-MM-DD');
 
     const datetime = date + ' ' + time;
-    const newData = new Issue({sender_id, sender_accountId, sender_name, title, content, status, reply, created_at: datetime, updated_at: datetime});
+    const newData = new Issue({sender_id, sender_accountId, sender_name, title, description, created_at: datetime, updated_at: datetime});
     try {
         await newData.save();
         res.status(201).json({isSuccess: true, message: 'New data is saved'})
