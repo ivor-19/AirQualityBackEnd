@@ -32,4 +32,34 @@ const postIssue = async (req, res) => {
     }
 }
 
-module.exports = {getIssueList, postIssue }
+const updateIssueStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    const philippineTime = moment().tz('Asia/Manila');
+    const time = philippineTime.format('hh:mm A');
+    const date = philippineTime.format('YYYY-MM-DD');
+
+    const datetime = date + ' ' + time;
+    
+    const updatedIssue = await Issue.findByIdAndUpdate(id,
+      { 
+        status,
+        updated_at: datetime
+      },
+      { new: true } // Return the updated document
+    );
+
+    if (!updatedIssue) {
+      return res.status(404).json({ success: false, message: 'Issue not found' });
+    }
+
+    res.json({ success: true, issue: updatedIssue });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+
+module.exports = {getIssueList, postIssue, updateIssueStatus }
