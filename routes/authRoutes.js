@@ -11,6 +11,6 @@ router.get('/notifications/getNotifs', getAllAndAdminDeviceNotifs)
 router.post('/editUser/:id', editUser)
 router.post('/deleteUser/:id', deleteUser) // Delete
 router.get('/:id', getSpecificUser) 
-router.get('/:email', getSpecificUserEmail) 
+router.get('/email/:email', getSpecificUserEmail) 
 
 module.exports = router;
