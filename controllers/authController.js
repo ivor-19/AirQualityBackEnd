@@ -241,7 +241,13 @@ const getSpecificUser = async (req, res) => {
 const getSpecificUserEmail = async (req, res) => {
     const { email } = req.params;  
     try {
-        const user = await User.findOne({ email: email.trim() }); // Corrected line
+        // Trim the email and use regex to match emails with surrounding whitespace
+        const user = await User.findOne({ 
+            email: { 
+                $regex: new RegExp(`^\\s*${email.trim()}\\s*$`, 'i') 
+            } 
+        });
+        
         if (!user) {
             return res.status(400).json({ isSuccess: false, message: "Email not found" });
         }
