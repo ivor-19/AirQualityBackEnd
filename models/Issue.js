@@ -8,7 +8,7 @@ const issueSchema = new mongoose.Schema({
   description: String,
   status: {
     type: String,
-    default: 'Open'
+    default: 'Pending'
   },
   created_at: String,
   updated_at: String,
