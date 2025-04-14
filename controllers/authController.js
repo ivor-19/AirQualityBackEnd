@@ -241,7 +241,7 @@ const getSpecificUser = async (req, res) => {
 const getSpecificUserEmail = async (req, res) => {
     const { email } = req.params;  
     try {
-        const user = await User.findOne({ email }); // Corrected line
+        const user = await User.findOne({ email: email.trim() }); // Corrected line
         if (!user) {
             return res.status(400).json({ isSuccess: false, message: "Email not found" });
         }
