@@ -238,6 +238,19 @@ const getSpecificUser = async (req, res) => {
     }
 }
 
+const getSpecificUserEmail = async (req, res) => {
+    const { email } = req.params;  
+    try {
+        const user = await User.findById(email); 
+        if (!user) {
+            return res.status(400).json({ isSuccess: false, message: "Email not found" });
+        }
+        res.status(200).json({ isSuccess: true, message: 'Email found', user });
+    } catch (error) {
+        res.status(500).json({ isSuccess: false, message: 'Error finding email', error });
+    }
+}
+
 const getEmails = async (req, res) => {
     try {
         const emails = await User.find({}).select('email');
@@ -283,4 +296,4 @@ const getAllAndAdminDeviceNotifs = async (req, res) => {
 };
 
 
-module.exports = {signup, login, getUsers, editUser, deleteUser, getSpecificUser, getEmails, getAllAndAdminDeviceNotifs};
+module.exports = {signup, login, getUsers, editUser, deleteUser, getSpecificUser, getEmails, getAllAndAdminDeviceNotifs, getSpecificUserEmail};
