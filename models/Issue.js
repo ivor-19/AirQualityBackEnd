@@ -7,6 +7,7 @@ const issueSchema = new mongoose.Schema({
   email: String,
   title: String,
   description: String,
+  comment: String,
   status: {
     type: String,
     default: 'Pending'
