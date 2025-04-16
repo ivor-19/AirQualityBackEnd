@@ -35,7 +35,7 @@ const postAQChart = async (req, res) => {
     // const philippineTime = moment().tz('Asia/Manila');
     // const time = philippineTime.format('hh:mm A');
     // const date = philippineTime.format('YYYY-MM-DD');
-    const newData = new AQChart({aqi, pm2_5, pm10, co, no2, asset_model, date: philippineTimeFull});
+    const newData = new AQChart({aqi, pm2_5, pm10, co, no2, asset_model, date: moment().tz('Asia/Manila').toDate()});
     try {
         await newData.save();
         const getList = await AQChart.find();
@@ -47,8 +47,8 @@ const postAQChart = async (req, res) => {
 
 const getAQHourlyAverages = async (req, res) => {
   try {
-    // Get current time in Manila timezone
-    const now = moment().tz('Asia/Manila').format('YYYY-MM-DDTHH:mm:ss.SSSZ');
+    // Get current time in Manila timezone as a Moment object
+    const now = moment().tz('Asia/Manila');
     
     // Calculate exactly 1 hour ago from current time
     const oneHourAgo = now.clone().subtract(1, 'hour');
@@ -56,8 +56,8 @@ const getAQHourlyAverages = async (req, res) => {
     // Get all readings from the past hour
     const readings = await AQChart.find({
       date: {
-        $gte: oneHourAgo.toDate(),
-        $lt: now.toDate()
+        $gte: oneHourAgo.toDate(), // Convert to JavaScript Date for MongoDB
+        $lt: now.toDate() // Convert to JavaScript Date for MongoDB
       }
     });
 

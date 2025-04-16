@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const { DateTime } = require('luxon'); 
+const moment = require('moment-timezone');
 
 const aqChartSchema = new mongoose.Schema({
   aqi: Number,
@@ -8,7 +8,7 @@ const aqChartSchema = new mongoose.Schema({
   co: Number,
   no2: Number,
   asset_model: String,
-  date: String
+  date: Date
 });
 
 // Define the model
