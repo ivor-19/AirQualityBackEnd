@@ -8,6 +8,13 @@ const validateUserExists = async (account_id) => {
     }
 };
 
+const validateEmailExists = async (email) => {
+    const emailExists = await User.findOne({ email });
+    if (emailExists) {
+        throw new Error('Email already exists.');
+    }
+};
+
 const checkDuplicateUser = async (account_id, user) => {
     const accountExists = account_id && account_id !== user.account_id ? await User.findOne({ account_id }) : null;
     if (accountExists) {
@@ -23,4 +30,4 @@ const hashPasswordIfNeeded = async (user, password) => {
     }
 };
 
-module.exports = { validateUserExists, checkDuplicateUser, hashPasswordIfNeeded };
+module.exports = { validateUserExists, checkDuplicateUser, hashPasswordIfNeeded, validateEmailExists };

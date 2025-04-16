@@ -1,6 +1,6 @@
 const User = require('../models/User');
 const { generateToken } = require('../services/authServices');
-const { validateUserExists, hashPasswordIfNeeded, checkDuplicateUser } = require('../middlewares/validationMiddleware');
+const { validateUserExists, hashPasswordIfNeeded, checkDuplicateUser, validateEmailExists } = require('../middlewares/validationMiddleware');
 const moment = require('moment-timezone');
 
 const signup = async (req, res) => {
@@ -8,6 +8,7 @@ const signup = async (req, res) => {
         const { account_id, username, email, password, role, status, asset_model, first_access, device_notif } = req.body;
 
         await validateUserExists(account_id);
+        await validateEmailExists(email);
 
         const newUser = new User({ account_id, username, email, password, role, status, asset_model, first_access, device_notif });
         await newUser.save();
