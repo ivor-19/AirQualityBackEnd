@@ -3,8 +3,8 @@ const { postAQChart, getAQChartByAssetModel, getAQChartList, getAQHourlyAverages
 const authenticateJWT = require('../middlewares/authenticateJWT');
 const router = express.Router();
 
-router.get('/average', getAQHourlyAverages);
-router.post('/addAQChart', postAQChart)
+router.get('/', getAQChartList);
+router.get('/average', getAQHourlyAverages)
 router.get('/:asset_model', getAQChartByAssetModel)
 router.post('/addAQChart', postAQChart)
 
