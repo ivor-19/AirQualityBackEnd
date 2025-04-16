@@ -9,9 +9,11 @@ const validateUserExists = async (account_id) => {
 };
 
 const validateEmailExists = async (email) => {
+    if (!email) return; // Skip if no email provided
+
     const emailExists = await User.findOne({ email });
     if (emailExists) {
-        throw new Error('Email already exists.');
+      throw new Error('Email already exists.');
     }
 };
 

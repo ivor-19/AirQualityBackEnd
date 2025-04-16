@@ -17,6 +17,9 @@ const signup = async (req, res) => {
         if (error.message === 'User already exists.') {
             return res.status(400).json({ message: error.message });
         }
+        else if (error.message === 'Email already exists.') {
+            return res.status(400).json({ message: error.message });
+        }
         res.status(500).json({ isSuccess: false, message: 'Server Error: Error creating account', error})
     }
 }
