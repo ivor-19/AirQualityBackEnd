@@ -47,17 +47,16 @@ const postAQChart = async (req, res) => {
 
 const getAQHourlyAverages = async (req, res) => {
   try {
-    // Get the current date and hour using moment
+    // Get current time in Manila timezone
     const now = moment().tz('Asia/Manila');
-    const currentHour = now.hour(); // Use moment's hour() method
     
-    // Calculate the start of the current hour
-    const startOfHour = now.clone().startOf('hour');
+    // Calculate exactly 1 hour ago from current time
+    const oneHourAgo = now.clone().subtract(1, 'hour');
     
-    // Get all readings from the current hour
+    // Get all readings from the past hour
     const readings = await AQChart.find({
       date: {
-        $gte: startOfHour.toDate(), // Convert moment to JavaScript Date
+        $gte: oneHourAgo.toDate(),
         $lt: now.toDate()
       }
     });
@@ -65,7 +64,7 @@ const getAQHourlyAverages = async (req, res) => {
     if (readings.length === 0) {
       return res.json({
         isSuccess: true,
-        message: "No data available for the current hour",
+        message: `No data available from ${oneHourAgo.format('h:mm A')} to ${now.format('h:mm A')}`,
         hourlyAverages: null
       });
     }
@@ -88,20 +87,21 @@ const getAQHourlyAverages = async (req, res) => {
 
     const count = readings.length;
     const hourlyAverages = {
-      hour: currentHour,
       aqi: parseFloat((sums.aqi / count).toFixed(2)),
       pm2_5: parseFloat((sums.pm2_5 / count).toFixed(2)),
       pm10: parseFloat((sums.pm10 / count).toFixed(2)),
       co: parseFloat((sums.co / count).toFixed(2)),
       no2: parseFloat((sums.no2 / count).toFixed(2)),
       count: count,
-      startTime: startOfHour.format('YYYY-MM-DD HH:mm:ss'),
-      endTime: now.format('YYYY-MM-DD HH:mm:ss')
+      timeRange: {
+        start: oneHourAgo.format('YYYY-MM-DD HH:mm:ss'),
+        end: now.format('YYYY-MM-DD HH:mm:ss')
+      }
     };
 
     res.json({
       isSuccess: true,
-      message: `Fetched hourly averages for ${currentHour}:00 successfully`,
+      message: `Averages calculated from ${oneHourAgo.format('h:mm A')} to ${now.format('h:mm A')}`,
       hourlyAverages
     });
   } catch (error) {
