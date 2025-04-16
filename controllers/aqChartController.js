@@ -45,4 +45,71 @@ const postAQChart = async (req, res) => {
     }
 }
 
-module.exports = {getAQChartList, getAQChartByAssetModel, postAQChart }
+const getAQHourlyAverages = async (req, res) => {
+    try {
+      // Get the current date and hour
+      const now = moment().tz('Asia/Manila').format('YYYY-MM-DDTHH:mm:ss.SSSZ');
+      const currentHour = now.getHours();
+      
+      // Calculate the start of the current hour (e.g., if now is 15:23, start is 15:00)
+      const startOfHour = new Date(now);
+      startOfHour.setMinutes(0, 0, 0);
+      
+      // Get all readings from the current hour
+      const readings = await AQChart.find({
+        date: {
+          $gte: startOfHour,
+          $lt: now
+        }
+      });
+  
+      if (readings.length === 0) {
+        return res.json({
+          isSuccess: true,
+          message: "No data available for the current hour",
+          hourlyAverages: null
+        });
+      }
+  
+      // Calculate averages
+      const sums = readings.reduce((acc, reading) => {
+        acc.aqi += reading.aqi;
+        acc.pm2_5 += reading.pm2_5;
+        acc.pm10 += reading.pm10;
+        acc.co += reading.co;
+        acc.no2 += reading.no2;
+        return acc;
+      }, {
+        aqi: 0,
+        pm2_5: 0,
+        pm10: 0,
+        co: 0,
+        no2: 0
+      });
+  
+      const count = readings.length;
+      const hourlyAverages = {
+        hour: currentHour,
+        aqi: sums.aqi / count,
+        pm2_5: sums.pm2_5 / count,
+        pm10: sums.pm10 / count,
+        co: sums.co / count,
+        no2: sums.no2 / count,
+        count: count
+      };
+  
+      res.json({
+        isSuccess: true,
+        message: `Fetched hourly averages for ${currentHour}:00 successfully`,
+        hourlyAverages
+      });
+    } catch (error) {
+      res.status(500).json({ 
+        isSuccess: false,
+        message: 'Error calculating hourly averages', 
+        error: error.message 
+      });
+    }
+  };
+
+module.exports = {getAQChartList, getAQChartByAssetModel, postAQChart, getAQHourlyAverages }
