@@ -48,7 +48,7 @@ const postAQChart = async (req, res) => {
 const getAQHourlyAverages = async (req, res) => {
   try {
     // Get current time in Manila timezone
-    const now = moment().tz('Asia/Manila');
+    const now = moment().tz('Asia/Manila').format('YYYY-MM-DDTHH:mm:ss.SSSZ');
     
     // Calculate exactly 1 hour ago from current time
     const oneHourAgo = now.clone().subtract(1, 'hour');
