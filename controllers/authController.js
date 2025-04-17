@@ -219,13 +219,43 @@ const editUser = async (req, res) => {
 const deleteUser = async (req, res) => {
     const { id } = req.params;  
     try {
-        const user = await User.findByIdAndDelete(id); 
+        // 1. Find the user first
+        const user = await User.findById(id);
         if (!user) {
             return res.status(400).json({ isSuccess: false, message: "User not found" });
         }
-        res.status(200).json({ isSuccess: true, message: 'User deleted successfully', user });
+
+        // 2. Create archive record
+        const archiveRecord = new Archive({
+            account_id: user.account_id,
+            username: user.username,
+            email: user.email,
+            password: user.password,
+            role: user.role,
+            status: user.status,
+            asset_model: user.asset_model,
+            first_access: user.first_access,
+            device_notif: user.device_notif,
+            created_at: user.created_at,
+            updated_at: user.updated_at
+        });
+
+        await archiveRecord.save();
+
+        // 3. Delete the original user
+        await User.findByIdAndDelete(id);
+
+        res.status(200).json({ 
+            isSuccess: true, 
+            message: 'User archived and deleted successfully', 
+            archivedUser: archiveRecord 
+        });
     } catch (error) {
-        res.status(500).json({ isSuccess: false, message: 'Error deleting user', error });
+        res.status(500).json({ 
+            isSuccess: false, 
+            message: 'Error during archive and delete process', 
+            error: error.message // Sending just the message to avoid sending entire error object
+        });
     }
 }
 
