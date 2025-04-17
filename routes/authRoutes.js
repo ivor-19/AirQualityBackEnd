@@ -11,7 +11,7 @@ router.get('/notifications/getNotifs', getAllAndAdminDeviceNotifs)
 
 router.get('/archive', getUsersArchive)
 router.post('/restore/:id', restoreUser)
-router.get('/deletePermanent/:id', deletePermanent)
+router.post('/deletePermanent/:id', deletePermanent)
 
 router.post('/editUser/:id', editUser)
 router.post('/deleteUser/:id', deleteUser) // Delete
