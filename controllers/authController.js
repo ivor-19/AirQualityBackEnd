@@ -1,4 +1,5 @@
 const User = require('../models/User');
+const Archive = require('../models/Archive');
 const { generateToken } = require('../services/authServices');
 const { validateUserExists, hashPasswordIfNeeded, checkDuplicateUser, validateEmailExists } = require('../middlewares/validationMiddleware');
 const moment = require('moment-timezone');
