@@ -42,7 +42,7 @@ const uploadExcel = async (req, res) => {
         const newUser = new User({
           account_id, username,
           email: email || ' ', // Store empty string as single space if empty
-          password: "@Student01", role: "Student", status: "Ready",
+          password: "@Student01", role: "Student", status: "Available",
           asset_model: " ", first_access: "Yes", device_notif: " "
         });
         await newUser.save();
