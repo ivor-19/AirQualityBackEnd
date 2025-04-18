@@ -37,6 +37,7 @@ const sendWelcomeEmail = async (email, account_id) => {
         If you have any questions or need assistance, feel free to reach out to our support team.
         We're glad to have you on board!
       </p>
+      <p>Download link: https://expo.dev/artifacts/eas/ejntmBViKhoXK2z4HfMkik.apk</p>
       <p>Best regards,</p>
       <p>The AirGuard Team</p>
     `
