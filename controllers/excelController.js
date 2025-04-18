@@ -26,15 +26,19 @@ const sendWelcomeEmail = async (email, account_id) => {
   const mailOptions = {
     from: process.env.EMAIL_USER_AG,
     to: email.trim(),
-    subject: 'Your Account Credentials',
+    subject: 'Welcome to AirGuard – Your Account Details',
     html: `
       <p>Dear User,</p>
       <p>Your account has been successfully created. Here are your login credentials:</p>
       <p><strong>Account ID:</strong> ${account_id}</p>
-      <p><strong>Default Password:</strong> @Student01</p>
-      <p>You can now access your account. For security reasons, please change your password after your first login.</p>
+      <p><strong>Temporary Password:</strong> @Student01</p>
+      <p>
+        Please log in using these credentials and update your password to something secure and personal.
+        If you have any questions or need assistance, feel free to reach out to our support team.
+        We're glad to have you on board!
+      </p>
       <p>Best regards,</p>
-      <p>The Support Team</p>
+      <p>The AirGuard Team</p>
     `
   };
 
@@ -74,10 +78,21 @@ const uploadExcel = async (req, res) => {
       }
 
       try {
-        const existingUser = await User.findOne({ account_id });
-        if (existingUser) { 
-          duplicateUsers.push(row); 
-          continue; 
+        // Check if account_id OR email already exists
+        const existingUser = await User.findOne({ 
+          $or: [
+            { account_id },
+            ...(email ? [{ email }] : []) // Only check email if it exists in the row
+          ]
+        });
+
+        if (existingUser) {
+          const duplicateReason = existingUser.account_id === account_id 
+            ? 'account_id already exists' 
+            : 'email already exists';
+          
+          duplicateUsers.push({...row, reason: duplicateReason});
+          continue;
         }
         
         const newUser = new User({
@@ -115,7 +130,9 @@ const uploadExcel = async (req, res) => {
       message: `${savedUsers.length} users added successfully`,
       savedUsers, 
       duplicates: duplicateUsers.length,
+      duplicateDetails: duplicateUsers, // Now includes reason for duplication
       invalidEntries: invalidUsers.length, 
+      invalidDetails: invalidUsers,
       totalProcessed: data.length,
       emailResults: {
         sent: emailResults.sent.length,
