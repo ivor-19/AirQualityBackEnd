@@ -83,5 +83,17 @@ const updateIssueComment = async (req, res) => {
   }
 };
 
+const deleteIssue = async (req, res) => {
+  const { id } = req.params;  
+  try {
+      const issue = await Issue.findByIdAndDelete(id); 
+      if (!issue) {
+          return res.status(400).json({ isSuccess: false, message: "Issue not found" });
+      }
+      res.status(200).json({ isSuccess: true, message: 'Issue deleted successfully', issue });
+  } catch (error) {
+      res.status(500).json({ isSuccess: false, message: 'Error deleting issue', error });
+  }
+}
 
-module.exports = {getIssueList, postIssue, updateIssueStatus, updateIssueComment}
+module.exports = {getIssueList, postIssue, updateIssueStatus, updateIssueComment, deleteIssue}
