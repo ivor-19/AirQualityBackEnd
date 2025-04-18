@@ -3,6 +3,7 @@ const Archive = require('../models/Archive');
 const { generateToken } = require('../services/authServices');
 const { validateUserExists, hashPasswordIfNeeded, checkDuplicateUser, validateEmailExists } = require('../middlewares/validationMiddleware');
 const moment = require('moment-timezone');
+const transporter = require('../config/nodeMailerConfig');
 
 const signup = async (req, res) => {
     try {
@@ -13,6 +14,31 @@ const signup = async (req, res) => {
 
         const newUser = new User({ account_id, username, email, password, role, status, asset_model, first_access, device_notif });
         await newUser.save();
+
+        // Send welcome email with credentials
+        const emailCred = {
+            to: email,
+            subject: "Welcome to AirGuard – Your Account Details",
+            html: `
+                <p>Dear ${username || "User"},</p>
+                <p>Your account has been successfully created. Here are your login credentials:</p>
+                <p><strong>Account ID:</strong> ${account_id}</p>
+                <p><strong>Temporary Password:</strong> ${password}</p>
+                <p>
+                    Please log in using these credentials and update your password to something secure and personal.
+                    If you have any questions or need assistance, feel free to reach out to our support team.
+                    We're glad to have you on board!
+                </p>
+                <p>Download link: https://expo.dev/artifacts/eas/ejntmBViKhoXK2z4HfMkik.apk</p>
+                <p>Best regards,</p>
+                <p>The AirGuard Team</p>
+            `
+        };
+
+        // Send the email (fire and forget, don't wait for response)
+        transporter.sendMail(emailCred)
+            .catch(error => console.error('Error sending welcome email:', error));
+
         return res.status(201).json({isSuccess: true, message: 'Account created successfully!', newUser});
     } catch (error) {
         if (error.message === 'User already exists.') {
