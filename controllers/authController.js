@@ -81,6 +81,9 @@ const login = async (req, res) => {
                 asset_model: user.asset_model,
                 first_access: user.first_access,
                 device_notif: user.device_notif,
+                profile_picture: user.profile_picture 
+                ? `data:image/jpeg;base64,${user.profile_picture.toString('base64')}`
+                : null,
                 // Do not send password to frontend for security reasons
             }
         });
@@ -216,6 +219,11 @@ const editUser = async (req, res) => {
         if (password) {
             // The password will be automatically hashed by the pre-save middleware
             user.password = password;
+        }
+
+        if (req.body.profile_picture) {
+            const base64Data = req.body.profile_picture.replace(/^data:image\/\w+;base64,/, '');
+            user.profile_picture = Buffer.from(base64Data, 'base64');
         }
 
         // Save the updated user

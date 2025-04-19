@@ -14,6 +14,9 @@ const userSchema = new mongoose.Schema({
     asset_model: {type: String, default: " "},
     first_access: {type: String, default: "Yes"},
     device_notif: {type: String, default: " "},
+    profile_picture: { 
+        data: Buffer,
+    },
     created_at: {
         type: String, 
         default: function() {
