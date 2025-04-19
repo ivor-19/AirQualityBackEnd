@@ -81,9 +81,7 @@ const login = async (req, res) => {
                 asset_model: user.asset_model,
                 first_access: user.first_access,
                 device_notif: user.device_notif,
-                profile_picture: user.profile_picture && user.profile_picture.data 
-                ? `data:${user.profile_picture.contentType};base64,${user.profile_picture.data.toString('base64')}`
-                : null,
+                // Do not send password to frontend for security reasons
             }
         });
     } catch (err) {
@@ -92,69 +90,83 @@ const login = async (req, res) => {
     }
   };
 
-  const getUsers = async (req, res) => {
+const getUsers = async (req, res) => {
     try {
-        const page = parseInt(req.query.page) || 1;
-        const limit = req.query.limit ? parseInt(req.query.limit) : null;
-        const skip = (page - 1) * (limit || 0);
+        const page = parseInt(req.query.page) || 1;  // Default to page 1 if not provided
+        
+        // Default to `null` (or `Infinity`) for limit if not provided
+        const limit = req.query.limit ? parseInt(req.query.limit) : null; 
 
-        const filters = ['username', 'email', 'asset_model', 'role'];
-        const query = {};
+        const skip = (page - 1) * (limit || 0);  // If there's no limit, skip 0 (no limit on number of results)
 
-        filters.forEach(field => {
-            if (req.query[field]) {
-                query[field] = { $regex: req.query[field], $options: 'i' };
-            }
-        });
-
-        if (req.query.search) {
-            query.$or = ['username', 'email', 'asset_model'].map(field => ({
-                [field]: { $regex: req.query.search, $options: 'i' }
-            }));
+        const filters = {
+            username: req.query.username || null,
+            email: req.query.email || null,
+            asset_model: req.query.asset_model || null,
+            role: req.query.role || null,  // Filter by role
+            search: req.query.search || null,
         }
 
-        // Exclude password and __v; include profile_picture for base64 conversion
-        const projection = '-password -__v';
+        const query = {};  // Initialize the query object
 
+        // Filter conditions for username, email, asset_model, and role
+        if (filters.username) {
+            query.username = { $regex: filters.username, $options: 'i' };
+        }
+
+        if (filters.email) {
+            query.email = { $regex: filters.email, $options: 'i' };
+        }
+
+        if (filters.asset_model) {
+            query.asset_model = { $regex: filters.asset_model, $options: 'i' };
+        }
+
+        if (filters.role) {  // Filter by role
+            query.role = filters.role;
+        }
+
+        // If a search term is provided, search in multiple fields (username, email, asset_model)
+        if (filters.search) {
+            query.$or = [
+                { username: { $regex: filters.search, $options: 'i' } },
+                { email: { $regex: filters.search, $options: 'i' } },
+                { asset_model: { $regex: filters.search, $options: 'i' } },
+            ]
+        }
+
+        // Fetch the users with pagination (skip, limit) and the constructed query
         const usersQuery = User.find(query)
-            .select(projection)
-            .skip(skip);
+            .skip(skip); // Skip the appropriate number of records based on page
 
-        if (limit) usersQuery.limit(limit);
+        // Apply the limit if it's defined
+        if (limit) {
+            usersQuery.limit(limit); // Apply limit only if it's not null/undefined
+        }
 
-        const [users, total] = await Promise.all([
-            usersQuery.exec(),
-            User.countDocuments(query)
-        ]);
+        const users = await usersQuery.exec();
 
-        // Convert profile_picture Binary data to base64 string (single line)
-        const formattedUsers = users.map(user => {
-            const u = user.toObject();
-            if (u.profile_picture?.data) {
-                // If profile_picture exists, convert Binary data to Base64
-                u.profile_picture = u.profile_picture.data.toString('base64');
-            }
-            return u;
-        });
+        // Get the total number of users matching the query (for pagination metadata)
+        const totalUsers = await User.countDocuments(query);
+        
+        // Calculate the last page number
+        const lastPage = limit ? Math.ceil(totalUsers / limit) : 1;  // If no limit, last page is 1
 
+        // Return the response with users and pagination metadata
         res.json({
             isSuccess: true,
-            users: formattedUsers,
+            users,
             pagination: {
-                total,
-                per_page: limit || total,
-                current_page: page,
-                last_page: limit ? Math.ceil(total / limit) : 1
+                total: totalUsers,            // Total number of users found
+                per_page: limit || totalUsers, // Number of users per page (if limit is not defined, show total count)
+                current_page: page,           // Current page number
+                last_page: lastPage,          // Last page number
             }
         });
     } catch (error) {
-        console.error('Error fetching users:', error);
-        res.status(500).json({ isSuccess: false, message: 'Error fetching users', error });
+        res.status(500).json({ isSuccess: false, message: 'Error fetching data', error });
     }
 };
-
-
-
 
 // const getUsers = async (req, res) => {
 //     try{
@@ -206,20 +218,6 @@ const editUser = async (req, res) => {
             user.password = password;
         }
 
-        if (req.body.profile_picture) {
-            // Extract Base64 data (remove "data:image/...;base64," prefix)
-            const base64Data = req.body.profile_picture.replace(/^data:\w+\/\w+;base64,/, '');
-            const buffer = Buffer.from(base64Data, 'base64');
-            
-            // Extract content type from the base64 string
-            const contentType = req.body.profile_picture.match(/^data:(\w+\/\w+);base64/)?.[1] || 'image/jpeg';
-            
-            user.profile_picture = {
-                data: buffer,
-                contentType: contentType
-            };
-        }
-
         // Save the updated user
         await user.save();
 
@@ -236,11 +234,7 @@ const editUser = async (req, res) => {
                 asset_model: user.asset_model,
                 first_access: user.first_access,
                 device_notif: user.device_notif,
-                updated_at: user.updated_at,
-                profile_picture: user.profile_picture && user.profile_picture.data 
-                ? `data:${user.profile_picture.contentType};base64,${user.profile_picture.data.toString('base64')}`
-                : null
-        
+                updated_at: user.updated_at
             }
         });
     } catch (error) {
@@ -299,13 +293,6 @@ const getSpecificUser = async (req, res) => {
         if (!user) {
             return res.status(400).json({ isSuccess: false, message: "User not found" });
         }
-
-        const userResponse = {
-            ...user._doc,
-            profile_picture: user.profile_picture && user.profile_picture.data 
-                ? `data:${user.profile_picture.contentType};base64,${user.profile_picture.data.toString('base64')}`
-                : null
-        };
         res.status(200).json({ isSuccess: true, message: 'User found', user });
     } catch (error) {
         res.status(500).json({ isSuccess: false, message: 'Error finding user', error });
