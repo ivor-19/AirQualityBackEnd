@@ -92,83 +92,50 @@ const login = async (req, res) => {
     }
   };
 
-const getUsers = async (req, res) => {
+  const getUsers = async (req, res) => {
     try {
-        const page = parseInt(req.query.page) || 1;  // Default to page 1 if not provided
-        
-        // Default to `null` (or `Infinity`) for limit if not provided
-        const limit = req.query.limit ? parseInt(req.query.limit) : null; 
+        const page = parseInt(req.query.page) || 1;
+        const limit = req.query.limit ? parseInt(req.query.limit) : null;
+        const skip = (page - 1) * (limit || 0);
 
-        const skip = (page - 1) * (limit || 0);  // If there's no limit, skip 0 (no limit on number of results)
+        const filters = ['username', 'email', 'asset_model', 'role'];
+        const query = {};
 
-        const filters = {
-            username: req.query.username || null,
-            email: req.query.email || null,
-            asset_model: req.query.asset_model || null,
-            role: req.query.role || null,  // Filter by role
-            search: req.query.search || null,
+        filters.forEach(field => {
+            if (req.query[field]) {
+                query[field] = { $regex: req.query[field], $options: 'i' };
+            }
+        });
+
+        if (req.query.search) {
+            query.$or = ['username', 'email', 'asset_model'].map(field => ({
+                [field]: { $regex: req.query.search, $options: 'i' }
+            }));
         }
 
-        const query = {};  // Initialize the query object
+        const usersQuery = User.find(query).skip(skip);
+        if (limit) usersQuery.limit(limit);
 
-        // Filter conditions for username, email, asset_model, and role
-        if (filters.username) {
-            query.username = { $regex: filters.username, $options: 'i' };
-        }
+        const [users, total] = await Promise.all([
+            usersQuery.exec(),
+            User.countDocuments(query)
+        ]);
 
-        if (filters.email) {
-            query.email = { $regex: filters.email, $options: 'i' };
-        }
-
-        if (filters.asset_model) {
-            query.asset_model = { $regex: filters.asset_model, $options: 'i' };
-        }
-
-        if (filters.role) {  // Filter by role
-            query.role = filters.role;
-        }
-
-        // If a search term is provided, search in multiple fields (username, email, asset_model)
-        if (filters.search) {
-            query.$or = [
-                { username: { $regex: filters.search, $options: 'i' } },
-                { email: { $regex: filters.search, $options: 'i' } },
-                { asset_model: { $regex: filters.search, $options: 'i' } },
-            ]
-        }
-
-        // Fetch the users with pagination (skip, limit) and the constructed query
-        const usersQuery = User.find(query)
-            .skip(skip); // Skip the appropriate number of records based on page
-
-        // Apply the limit if it's defined
-        if (limit) {
-            usersQuery.limit(limit); // Apply limit only if it's not null/undefined
-        }
-
-        const users = await usersQuery.exec();
-
-        // Get the total number of users matching the query (for pagination metadata)
-        const totalUsers = await User.countDocuments(query);
-        
-        // Calculate the last page number
-        const lastPage = limit ? Math.ceil(totalUsers / limit) : 1;  // If no limit, last page is 1
-
-        // Return the response with users and pagination metadata
         res.json({
             isSuccess: true,
             users,
             pagination: {
-                total: totalUsers,            // Total number of users found
-                per_page: limit || totalUsers, // Number of users per page (if limit is not defined, show total count)
-                current_page: page,           // Current page number
-                last_page: lastPage,          // Last page number
+                total,
+                per_page: limit || total,
+                current_page: page,
+                last_page: limit ? Math.ceil(total / limit) : 1
             }
         });
     } catch (error) {
-        res.status(500).json({ isSuccess: false, message: 'Error fetching data', error });
+        res.status(500).json({ isSuccess: false, message: 'Error fetching users', error });
     }
 };
+
 
 // const getUsers = async (req, res) => {
 //     try{
