@@ -1,5 +1,5 @@
 const express = require('express');
-const { uploadProfileImage, signup, login, getUsers, editUser, deleteUser, getSpecificUser, getEmails, getAllAndAdminDeviceNotifs, getSpecificUserEmail, changePassword } = require('../controllers/authController');
+const { signup, login, getUsers, editUser, deleteUser, getSpecificUser, getEmails, getAllAndAdminDeviceNotifs, getSpecificUserEmail, changePassword } = require('../controllers/authController');
 const { getUsersArchive, restoreUser, deletePermanent } = require('../controllers/archiveController');
 const router = express.Router();
 
@@ -14,7 +14,6 @@ router.post('/restore/:id', restoreUser)
 router.post('/deletePermanent/:id', deletePermanent)
 
 router.post('/editUser/:id', editUser)
-router.post('/changePhoto/:id', uploadProfileImage)
 router.post('/deleteUser/:id', deleteUser) // Delete
 router.get('/:id', getSpecificUser) 
 router.post('/changePassword/:id', changePassword)
