@@ -35,6 +35,7 @@ const restoreUser = async (req, res) => {
             asset_model: user.asset_model,
             first_access: user.first_access,
             device_notif: user.device_notif,
+            avatarPath: user.avatarPath,
             created_at: user.created_at,
             updated_at: user.updated_at
         });

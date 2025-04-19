@@ -12,7 +12,7 @@ const signup = async (req, res) => {
         await validateUserExists(account_id);
         await validateEmailExists(email);
 
-        const newUser = new User({ account_id, username, email, password, role, status, asset_model, first_access, device_notif });
+        const newUser = new User({ account_id, username, email, password, role, status, asset_model, first_access, device_notif, avatarPath: '' });
         await newUser.save();
 
         // Send welcome email with credentials
@@ -81,6 +81,7 @@ const login = async (req, res) => {
                 asset_model: user.asset_model,
                 first_access: user.first_access,
                 device_notif: user.device_notif,
+                avatarPath: user.avatarPath,
                 // Do not send password to frontend for security reasons
             }
         });
@@ -186,7 +187,7 @@ const editUser = async (req, res) => {
     try {
         const philippineTimeFull = moment().tz('Asia/Manila').format('YYYY-MM-DDTHH:mm:ss.SSSZ');
         const { id } = req.params;
-        const { account_id, username, email, password, role, status, asset_model, first_access, device_notif } = req.body;
+        const { account_id, username, email, password, role, status, asset_model, first_access, device_notif, avatarPath } = req.body;
 
         // Find the user by ID
         const user = await User.findById(id);
@@ -208,6 +209,7 @@ const editUser = async (req, res) => {
         if (asset_model) user.asset_model = asset_model;
         if (first_access !== undefined) user.first_access = first_access;
         if (device_notif !== undefined) user.device_notif = device_notif;
+        if (avatarPath !== undefined) user.avatarPath = avatarPath;
         
         // Always update the updated_at timestamp
         user.updated_at = philippineTimeFull;
@@ -234,6 +236,7 @@ const editUser = async (req, res) => {
                 asset_model: user.asset_model,
                 first_access: user.first_access,
                 device_notif: user.device_notif,
+                avatarPath: user.avatarPath,
                 updated_at: user.updated_at
             }
         });
@@ -263,6 +266,7 @@ const deleteUser = async (req, res) => {
             asset_model: user.asset_model,
             first_access: user.first_access,
             device_notif: user.device_notif,
+            avatarPath: user.avatarPath,
             created_at: user.created_at,
             updated_at: user.updated_at
         });
