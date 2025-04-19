@@ -113,7 +113,13 @@ const login = async (req, res) => {
             }));
         }
 
-        const usersQuery = User.find(query).skip(skip);
+        // Exclude password and __v; include profile_picture for base64 conversion
+        const projection = '-password -__v';
+
+        const usersQuery = User.find(query)
+            .select(projection)
+            .skip(skip);
+
         if (limit) usersQuery.limit(limit);
 
         const [users, total] = await Promise.all([
@@ -121,9 +127,18 @@ const login = async (req, res) => {
             User.countDocuments(query)
         ]);
 
+        // Convert profile_picture Buffer to base64 string in a single line
+        const formattedUsers = users.map(user => {
+            const u = user.toObject();
+            if (u.profile_picture?.data) {
+                u.profile_picture = u.profile_picture.data.toString('base64');
+            }
+            return u;
+        });
+
         res.json({
             isSuccess: true,
-            users,
+            users: formattedUsers,
             pagination: {
                 total,
                 per_page: limit || total,
@@ -132,9 +147,11 @@ const login = async (req, res) => {
             }
         });
     } catch (error) {
+        console.error('Error fetching users:', error);
         res.status(500).json({ isSuccess: false, message: 'Error fetching users', error });
     }
 };
+
 
 
 // const getUsers = async (req, res) => {
