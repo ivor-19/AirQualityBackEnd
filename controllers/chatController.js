@@ -12,8 +12,8 @@ const getChat = async (req, res) => {
 
 const postChat = async (req, res) => {
     const {message, sender, role, timestamp, avatarPath, date} = req.body;
-    const newChat = new Chat({message, sender, role, timestamp, date});
-
+    const newChat = new Chat({message, sender, role, timestamp, avatarPath, date});
+ 
     try {
         await newChat.save();
         const getChat = await Chat.find();
