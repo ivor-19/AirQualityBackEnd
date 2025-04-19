@@ -186,7 +186,7 @@ const editUser = async (req, res) => {
     try {
         const philippineTimeFull = moment().tz('Asia/Manila').format('YYYY-MM-DDTHH:mm:ss.SSSZ');
         const { id } = req.params;
-        const { account_id, username, email, password, role, status, asset_model, first_access, device_notif } = req.body;
+        const { account_id, username, email, password, role, status, asset_model, first_access, device_notif, removeImage } = req.body;
 
         // Find the user by ID
         const user = await User.findById(id);
@@ -194,12 +194,19 @@ const editUser = async (req, res) => {
             return res.status(404).json({ isSuccess: false, message: 'User not found' });
         }
 
-        // If username or email is being updated, check for duplicates
-        if (account_id) {
-            await checkDuplicateUser(account_id, user);
+        // Handle image removal if requested
+        if (removeImage) {
+            user.image = undefined; // This will remove the image field
+        }
+        // Handle image upload if provided
+        else if (req.file) {
+            user.image = {
+                data: req.file.buffer,
+                contentType: req.file.mimetype
+            };
         }
 
-        // Update user fields if provided
+        // Update other fields if provided
         if (account_id) user.account_id = account_id;
         if (username) user.username = username;
         if (email) user.email = email;
@@ -209,42 +216,39 @@ const editUser = async (req, res) => {
         if (first_access !== undefined) user.first_access = first_access;
         if (device_notif !== undefined) user.device_notif = device_notif;
         
-        // Handle image upload if provided
-        if (req.file) {
-            user.image = {
-                data: req.file.buffer, // The binary data of the image
-                contentType: req.file.mimetype // The MIME type of the image
-            };
-        }
-
         // Always update the updated_at timestamp
         user.updated_at = philippineTimeFull;
 
         // Handle password update specifically
         if (password) {
-            // The password will be automatically hashed by the pre-save middleware
             user.password = password;
         }
 
         // Save the updated user
         await user.save();
 
+        // Prepare response with image data if exists
+        const userResponse = {
+            _id: user._id,
+            account_id: user.account_id,
+            username: user.username,
+            email: user.email,
+            role: user.role,
+            status: user.status,
+            asset_model: user.asset_model,
+            first_access: user.first_access,
+            device_notif: user.device_notif,
+            updated_at: user.updated_at,
+            image: user.image ? {
+                data: user.image.data.toString('base64'),
+                contentType: user.image.contentType
+            } : null
+        };
+
         return res.status(200).json({ 
             isSuccess: true, 
             message: 'User updated successfully',
-            user: {
-                _id: user._id,
-                account_id: user.account_id,
-                username: user.username,
-                email: user.email,
-                role: user.role,
-                status: user.status,
-                asset_model: user.asset_model,
-                first_access: user.first_access,
-                device_notif: user.device_notif,
-                updated_at: user.updated_at,
-                hasImage: !!user.image // Add a flag indicating if image exists
-            }
+            user: userResponse
         });
     } catch (error) {
         console.error('Error editing user:', error);
