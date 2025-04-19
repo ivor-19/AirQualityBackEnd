@@ -81,7 +81,10 @@ const login = async (req, res) => {
                 asset_model: user.asset_model,
                 first_access: user.first_access,
                 device_notif: user.device_notif,
-                // Do not send password to frontend for security reasons
+                profile_picture: user.profile_picture && user.profile_picture.data 
+                ? `data:${user.profile_picture.contentType};base64,${user.profile_picture.data.toString('base64')}`
+                : null,
+
             }
         });
     } catch (err) {
@@ -218,6 +221,20 @@ const editUser = async (req, res) => {
             user.password = password;
         }
 
+        if (req.body.profile_picture) {
+            // Extract Base64 data (remove "data:image/...;base64," prefix)
+            const base64Data = req.body.profile_picture.replace(/^data:\w+\/\w+;base64,/, '');
+            const buffer = Buffer.from(base64Data, 'base64');
+            
+            // Extract content type from the base64 string
+            const contentType = req.body.profile_picture.match(/^data:(\w+\/\w+);base64/)?.[1] || 'image/jpeg';
+            
+            user.profile_picture = {
+                data: buffer,
+                contentType: contentType
+            };
+        }
+
         // Save the updated user
         await user.save();
 
@@ -234,59 +251,16 @@ const editUser = async (req, res) => {
                 asset_model: user.asset_model,
                 first_access: user.first_access,
                 device_notif: user.device_notif,
-                updated_at: user.updated_at
+                updated_at: user.updated_at,
+                profile_picture: user.profile_picture && user.profile_picture.data 
+                ? `data:${user.profile_picture.contentType};base64,${user.profile_picture.data.toString('base64')}`
+                : null
+        
             }
         });
     } catch (error) {
         console.error('Error editing user:', error);
         res.status(500).json({ isSuccess: false, message: 'Server Error: Error editing user', error });
-    }
-};
-
-const uploadProfileImage = async (req, res) => {
-    try {
-        const { id } = req.params;
-        const { image, contentType } = req.body;
-
-        if (!image || !contentType) {
-            return res.status(400).json({ isSuccess: false, message: "Image and content type are required" });
-        }
-
-        const base64Data = image.replace(/^data:\w+\/\w+;base64,/, '');
-        const buffer = Buffer.from(base64Data, 'base64');
-
-        // Check size before updating (10MB limit)
-        if (buffer.length > 10 * 1024 * 1024) {
-            return res.status(400).json({ isSuccess: false, message: "Image size exceeds 10MB limit" });
-        }
-
-        const updatedUser = await User.findByIdAndUpdate(
-            id,
-            {
-                profile_image: {
-                    data: buffer,
-                    contentType
-                },
-                updated_at: moment().tz('Asia/Manila').format('YYYY-MM-DDTHH:mm:ss.SSSZ')
-            },
-            { new: true }
-        );
-
-        if (!updatedUser) {
-            return res.status(404).json({ isSuccess: false, message: 'User not found' });
-        }
-
-        res.status(200).json({ 
-            isSuccess: true, 
-            message: 'Profile image updated successfully',
-            user: {
-                _id: updatedUser._id,
-                account_id: updatedUser.account_id,
-                username: updatedUser.username
-            }
-        });
-    } catch (error) {
-        res.status(500).json({ isSuccess: false, message: 'Server Error: Error updating profile image', error });
     }
 };
 
@@ -340,7 +314,13 @@ const getSpecificUser = async (req, res) => {
         if (!user) {
             return res.status(400).json({ isSuccess: false, message: "User not found" });
         }
-        res.status(200).json({ isSuccess: true, message: 'User found', user });
+        const userResponse = {
+            ...user._doc,
+            profile_picture: user.profile_picture && user.profile_picture.data 
+                ? `data:${user.profile_picture.contentType};base64,${user.profile_picture.data.toString('base64')}`
+                : null
+        };
+        res.status(200).json({ isSuccess: true, message: 'User found', userResponse });
     } catch (error) {
         res.status(500).json({ isSuccess: false, message: 'Error finding user', error });
     }
@@ -450,4 +430,4 @@ const changePassword = async (req, res) => {
 }
 
 
-module.exports = {uploadProfileImage, signup, login, getUsers, editUser, deleteUser, getSpecificUser, getEmails, getAllAndAdminDeviceNotifs, getSpecificUserEmail, changePassword};
+module.exports = {signup, login, getUsers, editUser, deleteUser, getSpecificUser, getEmails, getAllAndAdminDeviceNotifs, getSpecificUserEmail, changePassword};
