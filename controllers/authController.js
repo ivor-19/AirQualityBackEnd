@@ -127,10 +127,11 @@ const login = async (req, res) => {
             User.countDocuments(query)
         ]);
 
-        // Convert profile_picture Buffer to base64 string in a single line
+        // Convert profile_picture Binary data to base64 string (single line)
         const formattedUsers = users.map(user => {
             const u = user.toObject();
             if (u.profile_picture?.data) {
+                // If profile_picture exists, convert Binary data to Base64
                 u.profile_picture = u.profile_picture.data.toString('base64');
             }
             return u;
@@ -151,6 +152,7 @@ const login = async (req, res) => {
         res.status(500).json({ isSuccess: false, message: 'Error fetching users', error });
     }
 };
+
 
 
 
