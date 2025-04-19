@@ -21,6 +21,7 @@ const expoTokenRoutes = require('./routes/expoTokenRoutes');
 const aqChartRoutes = require('./routes/aqChartRoutes');
 const excelRoutes = require('./routes/excelRoutes');
 const issueRoutes = require('./routes/issueRoutes');
+const blobRoutes = require('./routes/blobRoutes');
 
 
 app.use(cors());
@@ -50,6 +51,7 @@ app.use('/expoToken', expoTokenRoutes)
 app.use('/aqChart', aqChartRoutes)
 app.use('/excel', excelRoutes)
 app.use('/issue', issueRoutes)
+app.use('/blob', blobRoutes)
 
 app.listen(port, () => {
     console.log(`Server is running at port ${port}`)
