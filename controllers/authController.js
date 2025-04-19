@@ -362,5 +362,45 @@ const getAllAndAdminDeviceNotifs = async (req, res) => {
     }
 };
 
+const changePassword = async (req, res) => {
+    try {
+        const { currentPassword, newPassword, confirmPassword } = req.body;
+        const { id } = req.params; 
 
-module.exports = {signup, login, getUsers, editUser, deleteUser, getSpecificUser, getEmails, getAllAndAdminDeviceNotifs, getSpecificUserEmail};
+        if (!currentPassword || !newPassword || !confirmPassword) {
+            return res.status(400).json({ isSuccess: false, message: 'All fields are required' });
+        }
+
+        if (newPassword !== confirmPassword) {
+            return res.status(400).json({ isSuccess: false, message: 'New passwords do not match' });
+        }
+
+        if (newPassword.length < 8) {
+            return res.status(400).json({ isSuccess: false, message: 'Password must be at least 8 characters' });
+        }
+
+        // Find user
+        const user = await User.findById(id);
+        if (!user) {
+            return res.status(404).json({ isSuccess: false, message: 'User not found' });
+        }
+
+        // Verify current password
+        const isMatch = await user.comparePassword(currentPassword);
+        if (!isMatch) {
+            return res.status(400).json({ isSuccess: false, message: 'Current password is incorrect' });
+        }
+
+        // Update password
+        user.password = newPassword;
+        await user.save();
+
+        return res.status(200).json({ isSuccess: true, message: 'Password changed successfully' });
+    } catch (error) {
+        console.error("Error changing password", error);
+        return res.status(500).json({ isSuccess: false, message: 'Error changing password', error: error.message });
+    }
+}
+
+
+module.exports = {signup, login, getUsers, editUser, deleteUser, getSpecificUser, getEmails, getAllAndAdminDeviceNotifs, getSpecificUserEmail, changePassword};
