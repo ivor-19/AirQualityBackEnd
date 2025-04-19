@@ -1,11 +1,9 @@
 const mongoose = require('mongoose');
 
 const blobSchema = new mongoose.Schema({
-  name: string,
-  image: data,
-});
+  name: { type: String, required: true },
+  image: { type: Buffer, required: true }, // Store binary data
+  contentType: { type: String, required: true }, // e.g., 'image/png'
+}, { timestamps: true });
 
-// Define the model
-const Blob = mongoose.model('Blob', blobSchema);
-
-module.exports = Blob;
+module.exports = mongoose.model('Blob', blobSchema);
