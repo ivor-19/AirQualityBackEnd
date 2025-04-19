@@ -8,7 +8,6 @@ const getBlob = async (req, res) => {
       _id: blob._id,
       name: blob.name,
       image: `data:${blob.image.contentType};base64,${blob.image.data.toString('base64')}`,
-      createdAt: blob.createdAt
     }));
     res.status(200).json({ success: true, data: blobsWithBase64 });
   } catch (error) {
@@ -46,7 +45,6 @@ const postBlob = async (req, res) => {
       data: {
         _id: newBlob._id,
         name: newBlob.name,
-        createdAt: newBlob.createdAt
       }
     });
   } catch (error) {
