@@ -4,6 +4,23 @@ const { generateToken } = require('../services/authServices');
 const { validateUserExists, hashPasswordIfNeeded, checkDuplicateUser, validateEmailExists } = require('../middlewares/validationMiddleware');
 const moment = require('moment-timezone');
 const transporter = require('../config/nodeMailerConfig');
+const multer = require('multer');
+
+const storage = multer.memoryStorage();
+const upload = multer({ 
+    storage: storage,
+    limits: {
+        fileSize: 5 * 1024 * 1024 // 5MB limit
+    },
+    fileFilter: (req, file, cb) => {
+        // Accept only image files
+        if (file.mimetype.startsWith('image/')) {
+            cb(null, true);
+        } else {
+            cb(new Error('Only image files are allowed!'), false);
+        }
+    }
+}).single('photo'); // Expects a field named 'photo' in the form data
 
 const signup = async (req, res) => {
     try {
@@ -186,7 +203,7 @@ const editUser = async (req, res) => {
     try {
         const philippineTimeFull = moment().tz('Asia/Manila').format('YYYY-MM-DDTHH:mm:ss.SSSZ');
         const { id } = req.params;
-        const { account_id, username, email, password, role, status, asset_model, first_access, device_notif, removeImage } = req.body;
+        const { account_id, username, email, password, role, status, asset_model, first_access, device_notif } = req.body;
 
         // Find the user by ID
         const user = await User.findById(id);
@@ -194,19 +211,12 @@ const editUser = async (req, res) => {
             return res.status(404).json({ isSuccess: false, message: 'User not found' });
         }
 
-        // Handle image removal if requested
-        if (removeImage) {
-            user.image = undefined; // This will remove the image field
-        }
-        // Handle image upload if provided
-        else if (req.file) {
-            user.image = {
-                data: req.file.buffer,
-                contentType: req.file.mimetype
-            };
+        // If username or email is being updated, check for duplicates
+        if (account_id) {
+            await checkDuplicateUser(account_id, user);
         }
 
-        // Update other fields if provided
+        // Update user fields if provided
         if (account_id) user.account_id = account_id;
         if (username) user.username = username;
         if (email) user.email = email;
@@ -221,34 +231,28 @@ const editUser = async (req, res) => {
 
         // Handle password update specifically
         if (password) {
+            // The password will be automatically hashed by the pre-save middleware
             user.password = password;
         }
 
         // Save the updated user
         await user.save();
 
-        // Prepare response with image data if exists
-        const userResponse = {
-            _id: user._id,
-            account_id: user.account_id,
-            username: user.username,
-            email: user.email,
-            role: user.role,
-            status: user.status,
-            asset_model: user.asset_model,
-            first_access: user.first_access,
-            device_notif: user.device_notif,
-            updated_at: user.updated_at,
-            image: user.image ? {
-                data: user.image.data.toString('base64'),
-                contentType: user.image.contentType
-            } : null
-        };
-
         return res.status(200).json({ 
             isSuccess: true, 
             message: 'User updated successfully',
-            user: userResponse
+            user: {
+                _id: user._id,
+                account_id: user.account_id,
+                username: user.username,
+                email: user.email,
+                role: user.role,
+                status: user.status,
+                asset_model: user.asset_model,
+                first_access: user.first_access,
+                device_notif: user.device_notif,
+                updated_at: user.updated_at
+            }
         });
     } catch (error) {
         console.error('Error editing user:', error);
@@ -415,5 +419,80 @@ const changePassword = async (req, res) => {
     }
 }
 
+const changePhoto = async (req, res) => {
+    // Handle the file upload with multer
+    upload(req, res, async function(err) {
+        if (err instanceof multer.MulterError) {
+            // A Multer error occurred during upload
+            return res.status(400).json({ 
+                isSuccess: false, 
+                message: `Upload error: ${err.message}` 
+            });
+        } else if (err) {
+            // An unknown error occurred
+            return res.status(500).json({ 
+                isSuccess: false, 
+                message: `Unknown error: ${err.message}` 
+            });
+        }
+        
+        try {
+            const { id } = req.params;
+            
+            // Check if a file was uploaded
+            if (!req.file) {
+                return res.status(400).json({ 
+                    isSuccess: false, 
+                    message: 'No image file provided' 
+                });
+            }
 
-module.exports = {signup, login, getUsers, editUser, deleteUser, getSpecificUser, getEmails, getAllAndAdminDeviceNotifs, getSpecificUserEmail, changePassword};
+            // Find the user by ID
+            const user = await User.findById(id);
+            if (!user) {
+                return res.status(404).json({ 
+                    isSuccess: false, 
+                    message: 'User not found' 
+                });
+            }
+
+            // Update the user's image field
+            user.image = {
+                data: req.file.buffer,
+                contentType: req.file.mimetype
+            };
+            
+            // Update timestamp
+            user.updated_at = moment().tz('Asia/Manila').format('YYYY-MM-DDTHH:mm:ss.SSSZ');
+
+            // Save the updated user
+            await user.save();
+
+            return res.status(200).json({ 
+                isSuccess: true, 
+                message: 'Profile photo updated successfully',
+                user: {
+                    _id: user._id,
+                    account_id: user.account_id,
+                    username: user.username,
+                    email: user.email,
+                    role: user.role,
+                    status: user.status,
+                    asset_model: user.asset_model,
+                    updated_at: user.updated_at
+                    // Not returning the image data as it would be too large
+                }
+            });
+        } catch (error) {
+            console.error('Error updating profile photo:', error);
+            res.status(500).json({ 
+                isSuccess: false, 
+                message: 'Server Error: Error updating profile photo', 
+                error: error.message 
+            });
+        }
+    });
+};
+
+
+module.exports = {signup, login, getUsers, editUser, deleteUser, getSpecificUser, getEmails, getAllAndAdminDeviceNotifs, getSpecificUserEmail, changePassword, changePhoto};
