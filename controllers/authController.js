@@ -221,18 +221,24 @@ const editUser = async (req, res) => {
             user.password = password;
         }
 
+        // Handle profile picture update
         if (req.body.profile_picture) {
-            // Extract Base64 data (remove "data:image/...;base64," prefix)
-            const base64Data = req.body.profile_picture.replace(/^data:\w+\/\w+;base64,/, '');
-            const buffer = Buffer.from(base64Data, 'base64');
-            
-            // Extract content type from the base64 string
-            const contentType = req.body.profile_picture.match(/^data:(\w+\/\w+);base64/)?.[1] || 'image/jpeg';
-            
-            user.profile_picture = {
-                data: buffer,
-                contentType: contentType
-            };
+            // Check if the user wants to remove the profile picture
+            if (req.body.profile_picture === 'remove') {
+                user.profile_picture = undefined;
+            } else {
+                // Extract Base64 data (remove "data:image/...;base64," prefix)
+                const base64Data = req.body.profile_picture.replace(/^data:\w+\/\w+;base64,/, '');
+                const buffer = Buffer.from(base64Data, 'base64');
+                
+                // Extract content type from the base64 string
+                const contentType = req.body.profile_picture.match(/^data:(\w+\/\w+);base64/)?.[1] || 'image/jpeg';
+                
+                user.profile_picture = {
+                    data: buffer,
+                    contentType: contentType
+                };
+            }
         }
 
         // Save the updated user
@@ -253,9 +259,8 @@ const editUser = async (req, res) => {
                 device_notif: user.device_notif,
                 updated_at: user.updated_at,
                 profile_picture: user.profile_picture && user.profile_picture.data 
-                ? `data:${user.profile_picture.contentType};base64,${user.profile_picture.data.toString('base64')}`
-                : null
-        
+                    ? `data:${user.profile_picture.contentType};base64,${user.profile_picture.data.toString('base64')}`
+                    : null
             }
         });
     } catch (error) {
