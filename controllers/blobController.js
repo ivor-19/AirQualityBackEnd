@@ -1,43 +1,43 @@
+const { put } = require('@vercel/blob');
 const Blob = require('../models/Blob');
 
 // GET all blobs
-const getBlob = async (req, res) => {
+const getBlobs = async (req, res) => {
   try {
-    const blobs = await Blob.find().sort({ createdAt: -1 }); // Newest first
-    const blobsWithBase64 = blobs.map(blob => ({
-      _id: blob._id,
-      name: blob.name,
-      image: `data:${blob.image.contentType};base64,${blob.image.data.toString('base64')}`,
-    }));
-    res.status(200).json({ success: true, data: blobsWithBase64 });
+    const blobs = await Blob.find().sort({ createdAt: -1 });
+    res.status(200).json({ success: true, data: blobs });
   } catch (error) {
     res.status(500).json({ success: false, error: 'Server error' });
   }
 };
 
 // POST a new blob
-const postBlob = async (req, res) => {
-  const { name, image, contentType } = req.body;
-
-  if (!name || !image || !contentType) {
-    return res.status(400).json({ success: false, error: "Name, image and content type are required" });
-  }
-
+const createBlob = async (req, res) => {
   try {
-    const base64Data = image.replace(/^data:\w+\/\w+;base64,/, '');
-    const buffer = Buffer.from(base64Data, 'base64');
+    const { name, fileData, fileName, contentType, size } = req.body;
 
-    // Check size before creating
-    if (buffer.length > 10 * 1024 * 1024) {
-      return res.status(400).json({ success: false, error: "Image size exceeds 10MB limit" });
+    if (!name || !fileData || !contentType) {
+      return res.status(400).json({ 
+        success: false, 
+        error: "Name, file data, and content type are required" 
+      });
     }
 
-    const newBlob = await Blob.create({ 
-      name, 
-      image: {
-        data: buffer,
-        contentType
-      } 
+    // Convert base64 to buffer
+    const buffer = Buffer.from(fileData, 'base64');
+
+    // Upload to Vercel Blob
+    const blob = await put(fileName, buffer, {
+      access: 'public',
+      contentType: contentType
+    });
+
+    // Store metadata in MongoDB
+    const newBlob = await Blob.create({
+      name,
+      blobUrl: blob.url,
+      contentType,
+      size: size || buffer.length
     });
 
     res.status(201).json({ 
@@ -45,14 +45,19 @@ const postBlob = async (req, res) => {
       data: {
         _id: newBlob._id,
         name: newBlob.name,
+        url: newBlob.blobUrl,
+        size: newBlob.size,
+        contentType: newBlob.contentType,
+        createdAt: newBlob.createdAt
       }
     });
   } catch (error) {
-    if (error.name === 'ValidationError') {
-      return res.status(400).json({ success: false, error: error.message });
-    }
-    res.status(500).json({ success: false, error: 'Server error' });
+    console.error('Error uploading blob:', error);
+    res.status(500).json({ success: false, error: 'Failed to upload file' });
   }
 };
 
-module.exports = { getBlob, postBlob };
+module.exports = {
+  getBlobs,
+  createBlob
+};
