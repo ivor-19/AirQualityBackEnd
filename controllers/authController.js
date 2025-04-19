@@ -209,6 +209,14 @@ const editUser = async (req, res) => {
         if (first_access !== undefined) user.first_access = first_access;
         if (device_notif !== undefined) user.device_notif = device_notif;
         
+        // Handle image upload if provided
+        if (req.file) {
+            user.image = {
+                data: req.file.buffer, // The binary data of the image
+                contentType: req.file.mimetype // The MIME type of the image
+            };
+        }
+
         // Always update the updated_at timestamp
         user.updated_at = philippineTimeFull;
 
@@ -234,7 +242,8 @@ const editUser = async (req, res) => {
                 asset_model: user.asset_model,
                 first_access: user.first_access,
                 device_notif: user.device_notif,
-                updated_at: user.updated_at
+                updated_at: user.updated_at,
+                hasImage: !!user.image // Add a flag indicating if image exists
             }
         });
     } catch (error) {
