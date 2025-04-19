@@ -14,7 +14,7 @@ const userSchema = new mongoose.Schema({
     asset_model: {type: String, default: " "},
     first_access: {type: String, default: "Yes"},
     device_notif: {type: String, default: " "},
-    image: {
+    profile_image: {  // Add this new field
         data: Buffer,
         contentType: String
     },
