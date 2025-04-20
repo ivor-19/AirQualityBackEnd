@@ -17,7 +17,8 @@ const saveFile = (file) => {
   });
 };
 
-const sendWelcomeEmail = async (email, account_id) => {
+const sendWelcomeEmail = async (email, account_id, role) => {
+  const tempPassword = role === 'Admin' ? '@Admin01' : '@Password01';
   const mailOptions = {
     from: process.env.EMAIL_USER_AG,
     to: email.trim(),
@@ -26,7 +27,8 @@ const sendWelcomeEmail = async (email, account_id) => {
       <p>Dear User,</p>
       <p>Your account has been successfully created. Here are your login credentials:</p>
       <p><strong>Account ID:</strong> ${account_id}</p>
-      <p><strong>Temporary Password:</strong> @Student01</p>
+      <p><strong>Role:</strong> ${role}</p>
+      <p><strong>Temporary Password:</strong> ${tempPassword}</p>
       <p>
         Please log in using these credentials and update your password to something secure and personal.
         If you have any questions or need assistance, feel free to reach out to our support team.
@@ -67,10 +69,17 @@ const uploadExcel = async (req, res) => {
       const account_id = row.account_id || row['account_id'];
       const username = row.username || row['username'];
       const email = (row.email || row['email'] || '').trim();
+      const role = (row.role || row['role'] || '').trim(); // Get role and trim whitespace
       
       // Skip if no email provided
       if (!email) {
         skippedUsers.push({...row, reason: 'No email provided'});
+        continue;
+      }
+      
+      // Skip if no role provided
+      if (!role) {
+        skippedUsers.push({...row, reason: 'No role provided'});
         continue;
       }
       
@@ -97,12 +106,15 @@ const uploadExcel = async (req, res) => {
           continue;
         }
         
+        // Set password based on role
+        const password = role === 'Admin' ? '@Admin01' : '@Password01';
+        
         const newUser = new User({
           account_id, 
           username,
           email,
-          password: "@Password01", 
-          role: "Student", 
+          password,
+          role, 
           status: "Available",
           asset_model: " ", 
           first_access: "Yes", 
@@ -114,7 +126,7 @@ const uploadExcel = async (req, res) => {
         savedUsers.push(newUser);
 
         try {
-          await sendWelcomeEmail(email, account_id);
+          await sendWelcomeEmail(email, account_id, role);
           emailResults.sent.push({ account_id, email });
         } catch (error) {
           emailResults.failed.push({ account_id, email, error: error.message });
