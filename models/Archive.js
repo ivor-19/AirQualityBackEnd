@@ -14,6 +14,7 @@ const archiveSchema = new mongoose.Schema({
     asset_model: {type: String},
     first_access: {type: String},
     device_notif: {type: String},
+    avatarPath: {type: String},
     created_at: {
         type: String, 
         
