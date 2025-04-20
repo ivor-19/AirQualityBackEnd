@@ -18,24 +18,32 @@ const getUsersArchive = async (req, res) => {
 const restoreUser = async (req, res) => {
     const { id } = req.params;  
     try {
-        // 1. Find the archived user
-        const archivedUser = await Archive.findById(id);
-        if (!archivedUser) {
-            return res.status(400).json({ isSuccess: false, message: "Archived user not found" });
+        // 1. Find the user first
+        const user = await Archive.findById(id);
+        if (!user) {
+            return res.status(400).json({ isSuccess: false, message: "User not found" });
         }
 
-        // 2. Create new user record
+        // 2. Create archive record
         const userRecord = new User({
-            ...archivedUser._doc,
-            updated_at: new Date() // Update the timestamp
+            account_id: user.account_id,
+            username: user.username,
+            email: user.email,
+            password: user.password,
+            role: user.role,
+            status: user.status,
+            asset_model: user.asset_model,
+            first_access: user.first_access,
+            device_notif: user.device_notif,
+            avatarPath: user.avatarPath,
+            created_at: user.created_at,
+            updated_at: user.updated_at,
+            avatarPath: user.avatarPath
         });
-
-        // Remove archive-specific fields if needed
-        delete userRecord._doc.archivedAt;
 
         await userRecord.save();
 
-        // 3. Delete the archive record
+        // 3. Delete the original user
         await Archive.findByIdAndDelete(id);
 
         res.status(200).json({ 
@@ -46,8 +54,8 @@ const restoreUser = async (req, res) => {
     } catch (error) {
         res.status(500).json({ 
             isSuccess: false, 
-            message: 'Error during restoration process', 
-            error: error.message
+            message: 'Error during archive and delete process', 
+            error: error.message // Sending just the message to avoid sending entire error object
         });
     }
 }

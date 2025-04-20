@@ -34,11 +34,16 @@ userSchema.pre('save', async function(next) {
         this.updated_at = moment().tz('Asia/Manila').format('YYYY-MM-DDTHH:mm:ss.SSSZ');
     }
 
-    if(this.isModified('password')){
-        const salt = await bcrypt.genSalt(10);
-        this.password = await bcrypt.hash(this.password, salt);
-        next();
+    if (this.isModified('password')) {
+        // Check if it's already a bcrypt hash (starts with $2a$, $2b$, or $2y$)
+        const isHashed = /^\$2[aby]\$/.test(this.password);
+        if (!isHashed) {
+            const salt = await bcrypt.genSalt(10);
+            this.password = await bcrypt.hash(this.password, salt);
+        }
     }
+
+    next();
 });
 
 userSchema.methods.comparePassword = async function(candidatePassword) {

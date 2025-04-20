@@ -255,10 +255,21 @@ const deleteUser = async (req, res) => {
             return res.status(400).json({ isSuccess: false, message: "User not found" });
         }
 
-        // 2. Create archive record (using spread operator for cleaner code)
+        // 2. Create archive record
         const archiveRecord = new Archive({
-            ...user._doc, // This copies all user fields
-            archivedAt: new Date() // Add archive timestamp
+            account_id: user.account_id,
+            username: user.username,
+            email: user.email,
+            password: user.password,
+            role: user.role,
+            status: user.status,
+            asset_model: user.asset_model,
+            first_access: user.first_access,
+            device_notif: user.device_notif,
+            avatarPath: user.avatarPath,
+            created_at: user.created_at,
+            updated_at: user.updated_at,
+            avatarPath: user.avatarPath
         });
 
         await archiveRecord.save();
@@ -275,7 +286,7 @@ const deleteUser = async (req, res) => {
         res.status(500).json({ 
             isSuccess: false, 
             message: 'Error during archive and delete process', 
-            error: error.message
+            error: error.message // Sending just the message to avoid sending entire error object
         });
     }
 }
