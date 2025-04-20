@@ -29,7 +29,7 @@ const signup = async (req, res) => {
                     If you have any questions or need assistance, feel free to reach out to our support team.
                     We're glad to have you on board!
                 </p>
-                <p>Download link: https://expo.dev/artifacts/eas/ejntmBViKhoXK2z4HfMkik.apk</p>
+                <p>Download link: https://expo.dev/artifacts/eas/e7v1vaKYfam3VQU7ikxBCm.apk</p>
                 <p>Best regards,</p>
                 <p>The AirGuard Team</p>
             `
