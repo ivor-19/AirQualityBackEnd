@@ -101,7 +101,7 @@ const uploadExcel = async (req, res) => {
           account_id, 
           username,
           email,
-          password: "@Student01", 
+          password: "@Password01", 
           role: "Student", 
           status: "Available",
           asset_model: " ", 

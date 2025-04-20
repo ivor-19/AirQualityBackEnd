@@ -57,7 +57,7 @@ const login = async (req, res) => {
   
         const user = await User.findOne({ account_id });
         if (!user) {
-            return res.status(400).json({ isSuccess: false, message: 'Student does not exists' });
+            return res.status(400).json({ isSuccess: false, message: 'Account does not exists' });
         }
   
         const isMatch = await user.comparePassword(password);
