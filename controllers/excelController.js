@@ -105,7 +105,8 @@ const uploadExcel = async (req, res) => {
           status: "Available",
           asset_model: " ", 
           first_access: "Yes", 
-          device_notif: " "
+          device_notif: " ",
+          avatarPath: "lemur",
         });
         
         await newUser.save();
