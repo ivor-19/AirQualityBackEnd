@@ -12,7 +12,7 @@ const signup = async (req, res) => {
         await validateUserExists(account_id);
         await validateEmailExists(email);
 
-        const newUser = new User({ account_id, username, email, password, role, status, asset_model, first_access, device_notif, avatarPath: '' });
+        const newUser = new User({ account_id, username, email, password, role, status, asset_model, first_access, device_notif });
         await newUser.save();
 
         // Send welcome email with credentials
@@ -269,7 +269,6 @@ const deleteUser = async (req, res) => {
             avatarPath: user.avatarPath,
             created_at: user.created_at,
             updated_at: user.updated_at,
-            avatarPath: user.avatarPath
         });
 
         await archiveRecord.save();

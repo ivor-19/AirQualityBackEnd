@@ -38,7 +38,6 @@ const restoreUser = async (req, res) => {
             avatarPath: user.avatarPath,
             created_at: user.created_at,
             updated_at: user.updated_at,
-            avatarPath: user.avatarPath
         });
 
         await userRecord.save();
