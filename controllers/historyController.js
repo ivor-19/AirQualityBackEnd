@@ -1,4 +1,5 @@
 const History = require('../models/History');
+const moment = require('moment-timezone');
 
 const getHistoryData = async (req, res) => {
     try {
@@ -34,8 +35,12 @@ const getHistoryData = async (req, res) => {
 
 
 const postHistoryData = async (req, res) => {
-    const {date, timestamp, aqi, pm2_5, pm10, co, no2, scanned_by, scanned_using_model, message} = req.body;
-    const newData = new History({date, timestamp, aqi, pm2_5, pm10, co, no2, scanned_by, scanned_using_model, message});
+    const philippineTime = moment().tz('Asia/Manila');
+    const timeNow = philippineTime.format('hh:mm A');
+    const dateNow = philippineTime.format('YYYY-MM-DD');
+
+    const {aqi, pm2_5, pm10, co, no2, scanned_by, scanned_using_model, message} = req.body;
+    const newData = new History({date: dateNow, timestamp: timeNow, aqi, pm2_5, pm10, co, no2, scanned_by, scanned_using_model, message});
 
     try {
         await newData.save();
